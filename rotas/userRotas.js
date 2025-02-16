@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/login", async (req,res)=>{
     const {email,senha} = req.body
     const usuario = await retornaParaLogin(email)
-    if (usuario.length === 0)   {
+    if (!usuario)   {
         return res.status(401).json({error:"usuario não encontrado"})
         
     }
