@@ -1,23 +1,32 @@
-import express, { response } from "express";
+import express from "express";
 import bcrypt from "bcrypt";
 import { retornaParaLogin } from "../servicos/retornaUsuarios.js";
 import { validaDados } from "../servicos/valida.js";
 import { cadastraUsuario } from "../servicos/cadastraUsuario.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
-
+const secredoai = 'i'
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body
     const usuario = await retornaParaLogin(email)
     if (!usuario) {
-        return res.status(401).json({ error: "usuario não encontrado" })
+        res.status(401).json({ error: "usuario não encontrado" })
 
     }
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
     if (!senhaCorreta) {
-        return res.status(401).json({ error: "senha incorreta" })
+        res.status(401).json({ error: "senha incorreta" })
+    } else {
+        const token = jwt.sign({email}, secredoai, {expiresIn:'1h'});
+        res.cookie('token', token,{
+            httpOnly:true,
+            secure: false,
+            sameSite: "lax"
+        });
+        res.json({ "mensagen": 'Usuario Logado com sucesso' })
     }
-    return res.json({ id: usuario.id })
+
 });
 
 router.post('/cadastro', async (req, res) => {
