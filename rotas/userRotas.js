@@ -3,10 +3,10 @@ import bcrypt from "bcrypt";
 import { retornaParaLogin } from "../servicos/retornaUsuarios.js";
 import { validaDados } from "../servicos/valida.js";
 import { cadastraUsuario } from "../servicos/cadastraUsuario.js";
+import { autenticar } from "../servicos/autenticar.js";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
-const secredoai = 'i'
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body
     const usuario = await retornaParaLogin(email)
@@ -18,16 +18,20 @@ router.post("/login", async (req, res) => {
     if (!senhaCorreta) {
         res.status(401).json({ error: "senha incorreta" })
     } else {
-        const token = jwt.sign({email}, secredoai, {expiresIn:'1h'});
+        const token = jwt.sign({email}, 'secreto', {expiresIn:'1h'});
         res.cookie('token', token,{
             httpOnly:true,
             secure: false,
             sameSite: "lax"
         });
-        res.json({ "mensagen": 'Usuario Logado com sucesso' })
+        res.status(200).json({ "usuario": usuario ,'token':token, 'mensagem':'Logado com sucesso'})
     }
 
 });
+
+router.get('/autenticar', autenticar, (req, res) =>{
+    res.json({'mensagen':"Dados Autenticados"})
+})
 
 router.post('/cadastro', async (req, res) => {
 
@@ -40,7 +44,13 @@ router.post('/cadastro', async (req, res) => {
         if (resultado.errno == 1062) {
             return res.status(409).json({ erro: "O e-mail já está cadastrado. Tente outro e-mail." })
         } else {
-            return res.status(201).json({
+            const token = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn:'1h'});
+            res.cookie('token', token,{
+                httpOnly:true,
+                secure: false,
+                sameSite: "lax"
+            });
+            res.status(201).json({
                 "mensagem": "Usuário cadastrado com sucesso.",
             })
         }
