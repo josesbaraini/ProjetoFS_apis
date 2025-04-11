@@ -1,4 +1,4 @@
-import express, { response } from "express";
+import express from "express";
 import { retornaUsuarios } from "../servicos/retornaUsuarios.js";
 
 const router = express.Router();

@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import userRotas from "./rotas/userRotas.js";
 import admRotas from "./rotas/admRotas.js";
+import treinosRotas from "./rotas/treinosRotas.js";
+import passosRotas from "./rotas/passosRotas.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -9,9 +11,12 @@ app.use(cookieParser())
 app.use(cors({
     credentials:true
 }));
+
 app.use(express.json())
 app.use("/api/user", userRotas);
 app.use("/api/adm", admRotas);
+app.use('/api/treinos', treinosRotas )
+app.use('/api/passos', passosRotas )
 
 const porta = 8000
 app.listen(porta, ()=>{
