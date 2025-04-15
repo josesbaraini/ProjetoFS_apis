@@ -1,5 +1,5 @@
 import express from "express";
-import { retornaUsuarios } from "../servicos/retornaUsuarios.js";
+import { retornaUsuarios } from "../services/retornaUsuarios.js";
 
 const router = express.Router();
 

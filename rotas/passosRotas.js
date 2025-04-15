@@ -1,5 +1,5 @@
 import express from "express";
-import { retornaPassos, retornaTodosPassos, retornaPassosOrdenados, retornaPassosNome } from "../servicos/retornaPassos.js";
+import { retornaPassos, retornaTodosPassos, retornaPassosOrdenados, retornaPassosNome } from "../services/retornaPassos.js";
 
 const router = express.Router();
 

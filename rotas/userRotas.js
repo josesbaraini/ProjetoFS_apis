@@ -1,9 +1,9 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { retornaParaLogin } from "../servicos/retornaUsuarios.js";
-import { validaDados } from "../servicos/validacoes/valida.js";
-import { cadastraUsuario } from "../servicos/cadastraUsuario.js";
-import { autenticar } from "../servicos/validacoes/autenticar.js";
+import { retornaParaLogin } from "../services/retornaUsuarios.js";
+import { validaDados } from "../services/validacoes/valida.js";
+import { cadastraUsuario } from "../services/cadastraUsuario.js";
+import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
