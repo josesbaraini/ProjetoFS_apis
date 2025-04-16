@@ -1,4 +1,4 @@
-import pool from "./conexao.js";
+import pool from "../conexao.js";
 
 export async function retornaTodosTreinos() {
     const conexao = await pool.getConnection();

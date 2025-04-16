@@ -1,5 +1,5 @@
 import express from "express";
-import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome } from "../services/retornaTreinos.js";
+import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome } from "../services/retorno/retornaTreinos.js";
 
 const router = express.Router();
 

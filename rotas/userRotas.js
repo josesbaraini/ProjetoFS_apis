@@ -1,8 +1,8 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { retornaParaLogin } from "../services/retornaUsuarios.js";
+import { retornaParaLogin } from "../services/retorno/retornaUsuarios.js";
 import { validaDados } from "../services/validacoes/valida.js";
-import { cadastraUsuario } from "../services/cadastraUsuario.js";
+import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
 
