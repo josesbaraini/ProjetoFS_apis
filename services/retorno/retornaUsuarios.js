@@ -17,8 +17,16 @@ export async function retornaParaLogin(email) {
 export async function retornaUsuarios()
 {
     const conexao = await pool.getConnection();
-    const query = 'SELECT id, nome, email, telefone, created_at, role FROM Usuarios';
+    const query = 'SELECT * FROM Usuarios';
     const usuarios = executaQuery(conexao, query);
     conexao.release();
     return usuarios;
+}
+
+export async function retornaUsuarioId(id) {
+    const conexao = await pool.getConnection();
+    const query = 'SELECT * FROM Usuarios WHERE id = ?';
+    const usuarios = await conexao.execute(query,[id])
+    conexao.release();
+    return usuarios[0];  
 }

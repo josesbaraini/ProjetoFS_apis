@@ -1,10 +1,11 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { retornaParaLogin } from "../services/retorno/retornaUsuarios.js";
+import { retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
 import { validaDados } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
+import { retornaDadosAvancados, retornaDadosBasicos } from "../services/retorno/retornaDadosUsuario.js";
 
 const router = express.Router();
 router.post("/login", async (req, res) => {
@@ -18,7 +19,7 @@ router.post("/login", async (req, res) => {
     if (!senhaCorreta) {
         res.status(401).json({ error: "senha incorreta" })
     } else {
-        const token = jwt.sign({email}, 'secreto', {expiresIn:'1h'});
+        const token = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn:'1h'});
         res.cookie('token', token,{
             httpOnly:true,
             secure: false,
@@ -56,6 +57,35 @@ router.post('/cadastro', async (req, res) => {
         }
     } else {
         return valida
+    }
+})
+router.get("/informacoes/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const usuario = await retornaUsuarioId(id);
+    if (usuario.length > 0) {
+        res.json(usuario[0]);
+    } else {
+        res.status(404).json({ mensagem: "Nenhum usuario encontrado" });
+    }
+})
+
+router.get('/dadosbasicos/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+    const usuario = await retornaDadosBasicos(id);
+    if (usuario.length > 0) {
+        res.json(usuario[0]);
+    } else {
+        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+    }
+})
+
+router.get('/dadosavancados/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+    const usuario = await retornaDadosAvancados(id);
+    if (usuario.length > 0) {
+        res.json(usuario[0]);
+    } else {
+        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
 })
 

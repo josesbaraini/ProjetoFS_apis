@@ -4,6 +4,8 @@ import userRotas from "./rotas/userRotas.js";
 import admRotas from "./rotas/admRotas.js";
 import treinosRotas from "./rotas/treinosRotas.js";
 import passosRotas from "./rotas/passosRotas.js";
+import notificacoesRotas from "./rotas/notificacoesRotas.js"
+import eventosRotas from './rotas/eventosRotas.js'
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -17,6 +19,8 @@ app.use("/api/user", userRotas);
 app.use("/api/adm", admRotas);
 app.use('/api/treinos', treinosRotas )
 app.use('/api/passos', passosRotas )
+app.use('/api/notificacoes', notificacoesRotas)
+app.use('/api/eventos', eventosRotas)
 
 const porta = 8000
 app.listen(porta, ()=>{
