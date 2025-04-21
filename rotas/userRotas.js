@@ -7,6 +7,7 @@ import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
 import { retornaDadosAvancados, retornaDadosBasicos } from "../services/retorno/retornaDadosUsuario.js";
 import { ehInteiro } from "../services/validacoes/testatipos.js";
+import { cadastraDadosAvancados, cadastraDadosBasicos } from "../services/cadastro/cadastraDadosUsuario.js";
 
 const router = express.Router();
 router.post("/login", async (req, res) => {
@@ -42,19 +43,21 @@ router.post('/cadastro', async (req, res) => {
     if (!valida) {
         const senha = await bcrypt.hash(senhaD, 10)
         const resultado = await cadastraUsuario(nome, email, senha, telefone)
-        console.log(resultado)
+        
         if (resultado.errno == 1062) {
             return res.status(409).json({ erro: "O e-mail já está cadastrado. Tente outro e-mail." })
         } else {
+            const usuario = await retornaParaLogin(email)
             const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            await cadastraDadosBasicos(usuario.id);
+            await cadastraDadosAvancados(usuario.id);
+            
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: false,
                 sameSite: "lax"
             });
-            res.status(201).json({
-                "mensagem": "Usuário cadastrado com sucesso.",
-            })
+            res.status(201).json({ "usuario": usuario, 'token': token, "mensagem": "Usuário cadastrado com sucesso."})
         }
     } else {
         return valida
