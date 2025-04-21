@@ -19,7 +19,7 @@ export async function retornaEventosSemana(id) {
       
         const resposta = resultado_query[0];
       
-        
+        conexao.release();
         return resposta;
         
 }
@@ -39,7 +39,7 @@ export async function retornaEventosMes(id, mes) {
       
         const resposta = resultado_query[0];
       
-        
+        conexao.release();
         return resposta;
         
     }
@@ -48,5 +48,6 @@ export async function retornaEventosId(id) {
     const query = "SELECT * FROM Eventos WHERE Usuario_id = ?";
     const resultado_query = await conexao.execute(query,[id]);
     const resposta = resultado_query[0];
+    conexao.release();
     return resposta;
 }

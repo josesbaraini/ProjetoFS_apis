@@ -5,5 +5,6 @@ export async function retornaNotificacoesId(id) {
     const query = "SELECT * FROM Notificacoes WHERE Usuario_id = ?";
     const resultado_query = await conexao.execute(query,[id]);
     const resposta = resultado_query[0];
+    conexao.release();
     return resposta;
 }

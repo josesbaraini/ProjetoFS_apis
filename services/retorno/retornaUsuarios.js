@@ -3,6 +3,7 @@ import pool from "../conexao.js";
 async function executaQuery(conexao,query) {
     const resultado_query = await conexao.execute(query)
     const resposta = resultado_query[0]
+    conexao.release();
     return resposta    
 }
 

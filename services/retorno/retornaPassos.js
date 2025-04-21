@@ -5,6 +5,7 @@ export async function retornaTodosPassos() {
     const query = "SELECT * FROM Passos";
     const resultado_query = await conexao.execute(query);
     const resposta = resultado_query[0];
+    conexao.release();
     return resposta
 }
 export async function retornaPassos(treinoId) {
@@ -12,6 +13,7 @@ export async function retornaPassos(treinoId) {
     const query = "SELECT * FROM Passos WHERE Treino_id = ?";
     const resultado_query = await conexao.execute(query, [treinoId]);
     const resposta = resultado_query[0];
+    conexao.release();
     return resposta
 }
 export async function retornaPassosNome(treinoId,nome) {
@@ -19,6 +21,7 @@ export async function retornaPassosNome(treinoId,nome) {
     const query = "SELECT * FROM Passos WHERE Treino_id = ? AND nome LIKE ?";
     const resultado_query = await conexao.execute(query, [treinoId,`${nome}%`]);
     const resposta = resultado_query[0];
+    conexao.release();
     return resposta
 }
 
@@ -37,5 +40,6 @@ export async function retornaPassosOrdenados(treinoId,ordem) {
     const query = `SELECT * FROM Passos WHERE Treino_id = ? ORDER BY ${ordem}`;
     const resultado_query = await conexao.execute(query, [treinoId]);
     const resposta = resultado_query[0];
+    conexao.release();
     return resposta
 }
