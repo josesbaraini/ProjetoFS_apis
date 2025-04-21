@@ -6,6 +6,7 @@ import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
 import { retornaDadosAvancados, retornaDadosBasicos } from "../services/retorno/retornaDadosUsuario.js";
+import { ehInteiro } from "../services/validacoes/testatipos.js";
 
 const router = express.Router();
 router.post("/login", async (req, res) => {
@@ -19,19 +20,19 @@ router.post("/login", async (req, res) => {
     if (!senhaCorreta) {
         res.status(401).json({ error: "senha incorreta" })
     } else {
-        const token = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn:'1h'});
-        res.cookie('token', token,{
-            httpOnly:true,
+        const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.cookie('token', token, {
+            httpOnly: true,
             secure: false,
             sameSite: "lax"
         });
-        res.status(200).json({ "usuario": usuario ,'token':token, 'mensagem':'Logado com sucesso'})
+        res.status(200).json({ "usuario": usuario, 'token': token, 'mensagem': 'Logado com sucesso' })
     }
 
 });
 
-router.get('/autenticar', autenticar, (req, res) =>{
-    res.json({'mensagen':"Dados Autenticados"})
+router.get('/autenticar', autenticar, (req, res) => {
+    res.json({ mensagem: "Dados Autenticados" })
 })
 
 router.post('/cadastro', async (req, res) => {
@@ -45,9 +46,9 @@ router.post('/cadastro', async (req, res) => {
         if (resultado.errno == 1062) {
             return res.status(409).json({ erro: "O e-mail já está cadastrado. Tente outro e-mail." })
         } else {
-            const token = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn:'1h'});
-            res.cookie('token', token,{
-                httpOnly:true,
+            const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            res.cookie('token', token, {
+                httpOnly: true,
                 secure: false,
                 sameSite: "lax"
             });
@@ -61,31 +62,51 @@ router.post('/cadastro', async (req, res) => {
 })
 router.get("/informacoes/:id", async (req, res) => {
     const id = parseInt(req.params.id);
-    const usuario = await retornaUsuarioId(id);
-    if (usuario.length > 0) {
-        res.json(usuario[0]);
+    if (ehInteiro(id)) {
+        res.status(404).json({ mensagem: "Id fornecido é invalido." })
     } else {
-        res.status(404).json({ mensagem: "Nenhum usuario encontrado" });
+
+
+        const usuario = await retornaUsuarioId(id);
+        if (usuario.length > 0) {
+            res.json(usuario[0]);
+        } else {
+            res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
+        }
     }
 })
 
 router.get('/dadosbasicos/:id', async (req, res) => {
-    const id = parseInt(req.params.id);
-    const usuario = await retornaDadosBasicos(id);
-    if (usuario.length > 0) {
-        res.json(usuario[0]);
+    const id = req.params.id;
+
+    if (ehInteiro(id)) {
+        res.status(404).json({ mensagem: "Id fornecido é invalido." })
     } else {
-        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+
+
+        const usuario = await retornaDadosBasicos(id);
+        if (usuario.length > 0) {
+            res.json(usuario[0]);
+        } else {
+            res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+        }
     }
 })
 
 router.get('/dadosavancados/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const usuario = await retornaDadosAvancados(id);
-    if (usuario.length > 0) {
-        res.json(usuario[0]);
+
+    if (ehInteiro(id)) {
+        res.status(404).json({ mensagem: "Id fornecido é invalido." })
     } else {
-        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+
+
+        const usuario = await retornaDadosAvancados(id);
+        if (usuario.length > 0) {
+            res.json(usuario[0]);
+        } else {
+            res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+        }
     }
 })
 

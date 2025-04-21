@@ -1,5 +1,6 @@
 import express from "express";
 import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome } from "../services/retorno/retornaTreinos.js";
+import { ehInteiro } from "../services/validacoes/testatipos.js";
 
 const router = express.Router();
 
@@ -14,6 +15,10 @@ router.post("/user", async (req, res) => {
         const {userId} = req.body
         let {ordem, nome} = req.query
         let treinos;
+        if (ehInteiro(id)) {
+            res.status(404).json({ mensagem: "Id fornecido é invalido." })
+        } else {
+    
         if(ordem){
             treinos = await retornaTreinosOrdenados(userId, ordem) 
         }else if(nome){
@@ -22,7 +27,7 @@ router.post("/user", async (req, res) => {
             treinos = await retornaTreinos(userId)
         }
 
-        res.json(treinos);
+        res.json(treinos);}
 });
 
 export default router;
