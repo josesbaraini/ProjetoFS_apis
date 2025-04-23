@@ -81,7 +81,7 @@ router.get("/informacoes/:id", async (req, res) => {
 
 router.get('/dadosbasicos/:id', async (req, res) => {
     let id = req.params.id;
-       id = perseInt(id)
+       id = parseInt(id)
 
     if (ehInteiro(id)) {
         res.status(404).json({ "mensagem": "Id fornecido é invalido." })
