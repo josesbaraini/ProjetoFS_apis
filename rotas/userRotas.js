@@ -19,7 +19,7 @@ router.post("/login", async (req, res) => {
     }
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
     if (!senhaCorreta) {
-        res.status(401).json({ error: "senha incorreta" })
+        res.status(401).json({ error: "senha incorreta." })
     } else {
         const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
