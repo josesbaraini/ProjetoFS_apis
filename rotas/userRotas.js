@@ -27,7 +27,7 @@ router.post("/login", async (req, res) => {
             secure: false,
             sameSite: "lax"
         });
-        res.status(200).json({ "usuario": usuario, 'token': token, 'mensagem': 'Logado com sucesso' })
+        res.status(200).json({ usuario: usuario, token: token, mensagem: 'Logado com sucesso' })
     }
 
 });
@@ -83,7 +83,7 @@ router.get('/dadosbasicos/:id', async (req, res) => {
     const id = req.params.id;
 
     if (ehInteiro(id)) {
-        res.status(404).json({ mensagem: "Id fornecido é invalido." })
+        res.status(404).json({ "mensagem": "Id fornecido é invalido." })
     } else {
 
 
