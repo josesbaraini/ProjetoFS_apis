@@ -19,17 +19,16 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/cadastro', async (req, res) => {
-    const {nome,assunto, tipo, data, situacao, id} = req.body;
-    try {
-        const resposta = await cadastraNotificacao(nome,assunto, tipo, data, situacao, id)
-        if (resposta) {
+    const {nome,assunto, tipo, id} = req.body;
+
+        const resposta = await cadastraNotificacao(nome,assunto, tipo, id)
+        if (resposta.affectedRows > 0) {
             res.status(200).json({ mensagem: "Notificação cadastrada com sucesso.", "resposta":resposta })
+        }else{
+            res.status(500).json({ mensagem: "Um erro ocorreu durante o cadastro. ", "erro" : resposta })
         }
         
-    } catch (error) {
-        res.status(500).json({ mensagem: "Um erro ocorreu durante o cadastro. ", "erro" : error })
-
-    }
+    
 
 });
 
