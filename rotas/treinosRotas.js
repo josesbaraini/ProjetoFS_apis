@@ -2,6 +2,8 @@ import express from "express";
 import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome } from "../services/retorno/retornaTreinos.js";
 import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { cadastraTreinos } from "../services/cadastro/cadastraTreinos.js";
+import { excluiTreinoId} from "../services/exclusao/excluiTreinos.js";
+import { excluiPassos } from "../services/exclusao/excluiPassos.js";
 
 const router = express.Router();
 
@@ -32,7 +34,7 @@ router.post("/user", async (req, res) => {
     }
 });
 
-router.post("/cadastrar/", async (req, res) => {
+router.post("/cadastrar", async (req, res) => {
     const { usuario_id, nome, descricao, anotacoes, passos } = req.body
     const dados = {
         "usuario_id": usuario_id,
@@ -45,5 +47,21 @@ router.post("/cadastrar/", async (req, res) => {
     const resposta = await cadastraTreinos(dados)
     res.json(resposta)
 })
+router.delete('/deletar/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
 
+    if (ehInteiro(id)) {
+        res.status(404).json({ mensagem: "Id fornecido é invalido." })
+    } else {
+
+
+        const respostaP = await excluiPassos(id);
+        if (respostaP.affectedRows > 0) {
+            const respostaT = await excluiTreinoId(id);
+            res.status(200).json({"resposta":respostaT, mensagem: "Treino deletado com sucesso." });
+        } else {
+            res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+        }
+    }
+})
 export default router;

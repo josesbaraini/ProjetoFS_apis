@@ -8,6 +8,12 @@ import jwt from "jsonwebtoken";
 import { retornaDadosAvancados, retornaDadosBasicos } from "../services/retorno/retornaDadosUsuario.js";
 import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { cadastraDadosAvancados, cadastraDadosBasicos } from "../services/cadastro/cadastraDadosUsuario.js";
+import { excluiDadosAvancados, excluiDadosBasicos } from "../services/exclusao/excluiDadosUsuario.js";
+import { excluiUsuarioId } from "../services/exclusao/excluiUsuarios.js";
+import { excluiTreinos } from "../services/exclusao/excluiTreinos.js";
+import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js";
+import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
+import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
 
 const router = express.Router();
 router.post("/login", async (req, res) => {
@@ -43,7 +49,7 @@ router.post('/cadastro', async (req, res) => {
     if (!valida) {
         const senha = await bcrypt.hash(senhaD, 10)
         const resultado = await cadastraUsuario(nome, email, senha, telefone)
-        
+
         if (resultado.errno == 1062) {
             return res.status(409).json({ erro: "O e-mail já está cadastrado. Tente outro e-mail." })
         } else {
@@ -51,13 +57,13 @@ router.post('/cadastro', async (req, res) => {
             const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
             await cadastraDadosBasicos(usuario.id);
             await cadastraDadosAvancados(usuario.id);
-            
+
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: false,
                 sameSite: "lax"
             });
-            res.status(201).json({ "usuario": usuario, 'token': token, "mensagem": "Usuário cadastrado com sucesso."})
+            res.status(201).json({ "usuario": usuario, 'token': token, "mensagem": "Usuário cadastrado com sucesso." })
         }
     } else {
         return valida
@@ -71,8 +77,41 @@ router.get("/informacoes/:id", async (req, res) => {
 
 
         const usuario = await retornaUsuarioId(id);
-        if (usuario.length > 0) {
+        if (usuario.affectedRows > 0) {
             res.json(usuario[0]);
+        } else {
+            res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
+        }
+    }
+})
+
+router.delete("/deletar/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    let resposta = []
+    let respostaI;
+    if (ehInteiro(id)) {
+        res.status(404).json({ mensagem: "Id fornecido é invalido." })
+    } else {
+
+        respostaI = await excluiDadosBasicos(id)
+        resposta.push(respostaI)
+        respostaI = await excluiDadosAvancados(id);
+        resposta.push(respostaI)
+        respostaI = await excluiPassoIdUsuario(id)
+        resposta.push(respostaI)
+        respostaI = await excluiTreinos(id)
+        resposta.push(respostaI)
+        respostaI = await excluiNotificacoesId(id)
+        resposta.push(respostaI)
+        respostaI = await excluiEventosId(id)
+        resposta.push(respostaI)
+        console.log(resposta)
+        const respostaF = await excluiUsuarioId(id);
+        
+        if (respostaF.affectedRows > 0) {
+            
+            
+            res.status(200).json({ "resposta": respostaF, mensagem: "Dados excluidos com sucesso." });
         } else {
             res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
         }
@@ -81,7 +120,7 @@ router.get("/informacoes/:id", async (req, res) => {
 
 router.get('/dadosbasicos/:id', async (req, res) => {
     let id = req.params.id;
-       id = parseInt(id)
+    id = parseInt(id)
 
     if (ehInteiro(id)) {
         res.status(404).json({ "mensagem": "Id fornecido é invalido." })

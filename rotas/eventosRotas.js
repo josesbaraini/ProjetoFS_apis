@@ -2,6 +2,7 @@ import express from "express";
 import { retornaEventosId, retornaEventosMes, retornaEventosSemana } from "../services/retorno/retornaEventos.js";
 import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { cadastraEvento } from "../services/cadastro/cadastraEventos.js";
+import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 
 const router = express.Router();
 
@@ -53,6 +54,21 @@ router.get('/estasemana/:id', async (req, res) => {
         };
     }
 });
+router.delete('/deletar/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+
+    if (ehInteiro(id)) {
+        res.status(404).json({ mensagem: "Id fornecido é invalido." })
+    } else {
+
+        const resposta = await excluiEventosId(id);
+        if (resposta.affectedRows > 0) {
+            res.status(200).json({"resposta":resposta, mensagem: "Evento deletado com sucesso." });
+        } else {
+            res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
+        }
+    };
+})
 
 router.post('/cadastro', async (req, res) => {
     const { id, nome, descricao, data } = req.body;

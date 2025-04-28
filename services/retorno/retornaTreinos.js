@@ -8,6 +8,14 @@ export async function retornaTodosTreinos() {
     conexao.release();
     return resposta
 }
+export async function retornaIdTreinos(userId) {
+    const conexao = await pool.getConnection();
+    const query = "SELECT id FROM Treinos WHERE Usuario_id = ?";
+    const resultado_query = await conexao.execute(query, [userId]);
+    const resposta = resultado_query[0];
+    conexao.release();
+    return resposta
+}
 export async function retornaTreinos(userId) {
     const conexao = await pool.getConnection();
     const query = "SELECT * FROM Treinos WHERE Usuario_id = ?";
