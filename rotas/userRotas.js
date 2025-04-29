@@ -6,7 +6,6 @@ import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
 import { retornaDadosAvancados, retornaDadosBasicos } from "../services/retorno/retornaDadosUsuario.js";
-import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { cadastraDadosAvancados, cadastraDadosBasicos } from "../services/cadastro/cadastraDadosUsuario.js";
 import { excluiDadosAvancados, excluiDadosBasicos } from "../services/exclusao/excluiDadosUsuario.js";
 import { excluiUsuarioId } from "../services/exclusao/excluiUsuarios.js";
@@ -14,6 +13,8 @@ import { excluiTreinos } from "../services/exclusao/excluiTreinos.js";
 import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js";
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
+import { validaParametroID } from "../services/validacoes/validaID.js";
+
 
 const router = express.Router();
 router.post("/login", async (req, res) => {
@@ -69,88 +70,63 @@ router.post('/cadastro', async (req, res) => {
         return valida
     }
 })
-router.get("/informacoes/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (ehInteiro(id)) {
-        res.status(404).json({ mensagem: "Id fornecido é invalido." })
+router.get("/informacoes/:id", validaParametroID(), async (req, res) => {
+    const id = req.params.id;
+    const usuario = await retornaUsuarioId(id);
+    if (usuario.affectedRows > 0) {
+        res.json(usuario[0]);
     } else {
-
-
-        const usuario = await retornaUsuarioId(id);
-        if (usuario.affectedRows > 0) {
-            res.json(usuario[0]);
-        } else {
-            res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
-        }
+        res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
     }
 })
 
-router.delete("/deletar/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
+router.delete("/deletar/:id", validaParametroID(), async (req, res) => {
+    const id = req.params.id;
     let resposta = []
     let respostaI;
-    if (ehInteiro(id)) {
-        res.status(404).json({ mensagem: "Id fornecido é invalido." })
-    } else {
+    respostaI = await excluiDadosBasicos(id)
+    resposta.push(respostaI)
+    respostaI = await excluiDadosAvancados(id);
+    resposta.push(respostaI)
+    respostaI = await excluiPassoIdUsuario(id)
+    resposta.push(respostaI)
+    respostaI = await excluiTreinos(id)
+    resposta.push(respostaI)
+    respostaI = await excluiNotificacoesId(id)
+    resposta.push(respostaI)
+    respostaI = await excluiEventosId(id)
+    resposta.push(respostaI)
+    console.log(resposta)
+    const respostaF = await excluiUsuarioId(id);
 
-        respostaI = await excluiDadosBasicos(id)
-        resposta.push(respostaI)
-        respostaI = await excluiDadosAvancados(id);
-        resposta.push(respostaI)
-        respostaI = await excluiPassoIdUsuario(id)
-        resposta.push(respostaI)
-        respostaI = await excluiTreinos(id)
-        resposta.push(respostaI)
-        respostaI = await excluiNotificacoesId(id)
-        resposta.push(respostaI)
-        respostaI = await excluiEventosId(id)
-        resposta.push(respostaI)
-        console.log(resposta)
-        const respostaF = await excluiUsuarioId(id);
-        
-        if (respostaF.affectedRows > 0) {
-            
-            
-            res.status(200).json({ "resposta": respostaF, mensagem: "Dados excluidos com sucesso." });
-        } else {
-            res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
-        }
+    if (respostaF.affectedRows > 0) {
+
+
+        res.status(200).json({ resposta: respostaF, mensagem: "Dados excluidos com sucesso." });
+    } else {
+        res.status(404).json({ mensagem: "Nenhum usuario encontrado com base no id fornecido" });
     }
 })
 
-router.get('/dadosbasicos/:id', async (req, res) => {
-    let id = req.params.id;
-    id = parseInt(id)
-
-    if (ehInteiro(id)) {
-        res.status(404).json({ "mensagem": "Id fornecido é invalido." })
+router.get('/dadosbasicos/:id', validaParametroID(), async (req, res) => {
+    const id = req.params.id;
+    const usuario = await retornaDadosBasicos(id);
+    if (usuario.length > 0) {
+        res.json(usuario[0]);
     } else {
-
-
-        const usuario = await retornaDadosBasicos(id);
-        if (usuario.length > 0) {
-            res.json(usuario[0]);
-        } else {
-            res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
-        }
+        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
 })
 
-router.get('/dadosavancados/:id', async (req, res) => {
-    const id = parseInt(req.params.id);
-
-    if (ehInteiro(id)) {
-        res.status(404).json({ mensagem: "Id fornecido é invalido." })
+router.get('/dadosavancados/:id', validaParametroID(), async (req, res) => {
+    const id = req.params.id;
+    const usuario = await retornaDadosAvancados(id);
+    if (usuario.length > 0) {
+        res.json(usuario[0]);
     } else {
-
-
-        const usuario = await retornaDadosAvancados(id);
-        if (usuario.length > 0) {
-            res.json(usuario[0]);
-        } else {
-            res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
-        }
+        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
+
 })
 
 export default router;
