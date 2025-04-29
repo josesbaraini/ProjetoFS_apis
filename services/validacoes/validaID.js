@@ -1,12 +1,12 @@
 export function validaParametroID(paramName = 'id'){
   return (req, res, next) =>  {
-    const value = req.body[paramName];
+    const value = req.params[paramName];
   
   if (!/^\d+$/.test(value)) {
     return res.status(400).json({ error: `Paremetro ${paramName} inválido: deve ser um número inteiro positivo` });
   }
 
-  req.body[paramName] = Number(value);
+  req.params[paramName] = Number(value);
   next();}
 }
 

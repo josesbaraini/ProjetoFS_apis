@@ -1,6 +1,5 @@
 import express from "express";
 import { retornaEventosId, retornaEventosMes, retornaEventosSemana } from "../services/retorno/retornaEventos.js";
-import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { cadastraEvento } from "../services/cadastro/cadastraEventos.js";
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { validaBodyID, validaParametroID } from "../services/validacoes/validaID.js";

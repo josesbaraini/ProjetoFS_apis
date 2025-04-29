@@ -1,6 +1,5 @@
 import express from "express";
 import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome } from "../services/retorno/retornaTreinos.js";
-import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { cadastraTreinos } from "../services/cadastro/cadastraTreinos.js";
 import { excluiTreinoId } from "../services/exclusao/excluiTreinos.js";
 import { excluiPassos } from "../services/exclusao/excluiPassos.js";

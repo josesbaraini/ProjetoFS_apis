@@ -1,6 +1,5 @@
 import express from "express";
 import { retornaPassos, retornaTodosPassos, retornaPassosOrdenados, retornaPassosNome } from "../services/retorno/retornaPassos.js";
-import { ehInteiro } from "../services/validacoes/testatipos.js";
 import { excluiPassoId, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaBodyID, validaParametroID } from "../services/validacoes/validaID.js";
 
