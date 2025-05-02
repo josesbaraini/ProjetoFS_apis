@@ -139,7 +139,10 @@ router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), asy
         }else{
             const resultado = await atualizaDadosBasicos(id, campos);
             if (resultado.affectedRows > 0) {
-                return res.status(202).json({"Mensagen:":"Registro atuzalizado com sucesso"});
+                return res.status(202).json({"Mensagen:":"Registro atuzalizado com sucesso",
+                     "Dados":
+                     {"peso":campos.peso/100,
+                    "altura":campos.altura/100}});
             } else {
                 return res.status(404).json({"Erro:":"Registro Não encontrado"});
                 

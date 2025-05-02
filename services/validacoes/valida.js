@@ -1,32 +1,25 @@
 
 export function validaDadosBasicos() {
     return (req, res, next) => {
-        const { peso, altura } = req.body
-        const campos = {}
+        const { peso, altura } = req.body;
+        const campos = {};
         if (peso !== undefined) {
-            if (!/^\d+$/.test(peso)) {
-                return res.status(400).json({ "erro": "Peso fornecido é invalido." })
+            const pesoNum = parseFloat(peso);
+            if (isNaN(pesoNum) || pesoNum <= 0 || pesoNum > 500) {
+                return res.status(400).json({ "erro": "Peso fornecido é inválido." });
             }
-
-            const pesoNum = Number(peso);
-            campos.peso = (peso.toString().length >= 2)
-                ? pesoNum / (10 ** (peso.toString().length - 1))
-                : pesoNum;
-
+            campos.peso = Math.round(pesoNum * 100);
         }
         if (altura !== undefined) {
-            if (!/^\d+$/.test(altura)) {
-                return res.status(400).json({ "erro": "Altura fornecida é invalido." })
+            const alturaNum = parseFloat(altura);
+            if (isNaN(alturaNum) || alturaNum <= 0.3 || alturaNum > 2.5) {
+                return res.status(400).json({ "erro": "Altura fornecida é inválida." });
             }
-
-            const alturaNum = Number(altura);
-            campos.altura = (altura.toString().length >= 3)
-                ? alturaNum / (10 ** (altura.toString().length - 2))
-                : alturaNum;
+            campos.altura = Math.round(alturaNum * 100);
         }
 
-        req.body.campos = campos
-        next()
+        req.body.campos = campos;
+        next();
     };
 }
 
