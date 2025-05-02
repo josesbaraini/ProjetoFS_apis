@@ -1,4 +1,5 @@
-import { retornaIdTreinos } from "./services/retorno/retornaTreinos.js";
 
-const teste = await retornaIdTreinos(1);
+
+const teste = 12;
+console.log(((teste.toString()).length-1))
 console.log(teste)

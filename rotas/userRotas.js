@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import { retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
-import { validaDados } from "../services/validacoes/valida.js";
+import { validaDados, validaDadosBasicos } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
@@ -14,6 +14,7 @@ import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaParametroID } from "../services/validacoes/validaID.js";
+import { atualizaDadosBasicos } from "../services/atualizacao/atualizaInfoBasico.js";
 
 
 const router = express.Router();
@@ -126,6 +127,24 @@ router.get('/dadosavancados/:id', validaParametroID(), async (req, res) => {
     } else {
         res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
+
+})
+
+router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), async (req, res) =>{
+        const {id} = req.params
+        const {campos} = req.body
+
+        if(Object.keys(campos).length === 0){
+            res.status(404).json({"Erro:":"Nenhum campo valido foi enviado para atualização"});
+        }else{
+            const resultado = await atualizaDadosBasicos(id, campos);
+            if (resultado.affectedRows > 0) {
+                return res.status(202).json({"Mensagen:":"Registro atuzalizado com sucesso"});
+            } else {
+                return res.status(404).json({"Erro:":"Registro Não encontrado"});
+                
+            }
+        }
 
 })
 
