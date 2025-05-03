@@ -7,6 +7,7 @@ export function validaParametroID(paramName = 'id'){
   }
 
   req.params[paramName] = Number(value);
+  console.log("id deu bom")
   next();}
 }
 

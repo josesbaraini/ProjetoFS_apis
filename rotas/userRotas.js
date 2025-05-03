@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import { retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
-import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validarCampos } from "../services/validacoes/valida.js";
+import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validaDadosUsuario, validarCampos } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
@@ -14,7 +14,7 @@ import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaParametroID } from "../services/validacoes/validaID.js";
-import { atualizaDadosAvancados, atualizaDadosBasicos } from "../services/atualizacao/atualizaInfoBasico.js";
+import { atualizaDadosAvancados, atualizaDadosBasicos, atualizaUsuario } from "../services/atualizacao/atualizaUsuario.js";
 
 
 const router = express.Router();
@@ -163,5 +163,25 @@ router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), asy
 
 
 })
+router.patch('/:id', validaParametroID(), validaDadosUsuario(), async (req, res) => {
+    const {id} = req.params;
+    const {campos} = req.body;
 
+    if (!validarCampos(campos)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    const resultado = await atualizaUsuario(id, campos);
+
+    return respostaAtualizacao(res, resultado, {
+        "nome": campos.nome?campos.nome:"Dado Não Alterado",
+        "email": campos.email?campos.email:"Dado Não alterado",
+        "telefone": campos.telefone?campos.telefone:"Dado Não Alterado",
+        "data_nascimento": campos["data_nascimento"]?campos["data_nascimento"]:"Dado Não alterado",
+        "role":campos.role?campos.role:"Dado Não Alterado",
+        "senha":campos.senha?"Senha Alterada":"Dado Não Alterado"
+    });
+    
+
+    
+})
 export default router;

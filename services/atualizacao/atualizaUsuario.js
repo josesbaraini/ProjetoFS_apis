@@ -21,3 +21,14 @@ export async function atualizaDadosAvancados(id, campos) {
     conexao.release()
     return  resposta
 }
+
+export async function atualizaUsuario(id, campos) {
+    const conexao = await pool.getConnection();
+    const colunas = Object.keys(campos).map(campo => `${campo} = ?`).join(', ');
+    const valores = Object.values(campos);
+    const query = `UPDATE Usuarios SET ${colunas} where id =?`
+    valores.push(id)
+    const [resposta] = await conexao.execute(query, valores)
+    conexao.release()
+    return  resposta
+}
