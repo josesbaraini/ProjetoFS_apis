@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
-
+const nomeRegex = /^.{2,}$/
 export function validaDadosBasicos() {
     return (req, res, next) => {
         const { peso, altura } = req.body;
@@ -135,6 +135,36 @@ export function  validaDadosUsuario() {
     }
 }
 
+export function validaDadosEventos() {
+    return async (req, res, next)=>{
+        const campos = {}
+        const {nome, descricao, data} = req.body
+        if (nome !== undefined) {
+            const nomeLimpo = String(nome).trim();
+            if(!nomeRegex.test(nomeLimpo)){
+                return res.status(400).json({ erro: "Nome fornecido é inválido." });
+            }
+            campos.nome = nomeLimpo
+        }
+        if (descricao !== undefined) {
+            const descricaoLimpo = String(descricao).trim();
+            if(!nomeRegex.test(descricaoLimpo)){
+                return res.status(400).json({ erro: "Descrição fornecida é inválida." });
+            }
+            campos.descricao = descricaoLimpo
+        }
+        if (data !== undefined) {
+            const dataLimpo = String(data).trim();
+            if (!dayjs(dataLimpo, 'YYYY-MM-DD', true).isValid()) {
+                return res.status(400).json({ erro: "Data fornecida é inválida." });
+            }
+            campos.data = dataLimpo
+        }
+        req.body.campos = campos;
+        next();
+
+    }
+}
 
 export function validaDados(res, nome, email, telefone) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

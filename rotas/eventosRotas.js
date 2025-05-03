@@ -3,6 +3,8 @@ import { retornaEventosId, retornaEventosMes, retornaEventosSemana } from "../se
 import { cadastraEvento } from "../services/cadastro/cadastraEventos.js";
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { validaBodyID, validaParametroID } from "../services/validacoes/validaID.js";
+import { atualizaEvento } from "../services/atualizacao/atualizaEventos.js";
+import { respostaAtualizacao, validaDadosEventos, validarCampos } from "../services/validacoes/valida.js";
 
 const router = express.Router();
 
@@ -62,5 +64,23 @@ router.post('/cadastro', validaBodyID(), async (req, res) => {
         res.status(500).json({ mensagem: "Um erro ocorreu durante o cadastro. ", "erro": error })
     }
 });
+
+router.patch('/:id', validaParametroID(), validaDadosEventos(), async (req, res) => {
+    const { id } = req.params
+    const { campos } = req.body
+
+    if (!validarCampos(campos)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    const resultado = await atualizaEvento(id, campos);
+
+    return respostaAtualizacao(res, resultado, {
+        "nome":campos.nome?campos.nome:"Dado Não Alterado",
+        "descricao":campos.descricao?campos.descricao:"Dado Não Alterado",
+        "data":campos.data?campos.data:"Dado Não Alterado"
+    });
+
+
+})
 
 export default router;
