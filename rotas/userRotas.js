@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import { retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
-import { validaDados, validaDadosBasicos } from "../services/validacoes/valida.js";
+import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validarCampos } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
@@ -14,7 +14,7 @@ import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaParametroID } from "../services/validacoes/validaID.js";
-import { atualizaDadosBasicos } from "../services/atualizacao/atualizaInfoBasico.js";
+import { atualizaDadosAvancados, atualizaDadosBasicos } from "../services/atualizacao/atualizaInfoBasico.js";
 
 
 const router = express.Router();
@@ -130,24 +130,37 @@ router.get('/dadosavancados/:id', validaParametroID(), async (req, res) => {
 
 })
 
-router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), async (req, res) =>{
-        const {id} = req.params
-        const {campos} = req.body
+router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(), async (req, res)=>{
+    const { id } = req.params
+    const { campos } = req.body
+    if (!validarCampos(campos)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    const resultado = await atualizaDadosAvancados(id, campos);
 
-        if(Object.keys(campos).length === 0){
-            res.status(404).json({"Erro:":"Nenhum campo valido foi enviado para atualização"});
-        }else{
-            const resultado = await atualizaDadosBasicos(id, campos);
-            if (resultado.affectedRows > 0) {
-                return res.status(202).json({"Mensagen:":"Registro atuzalizado com sucesso",
-                     "Dados":
-                     {"peso":campos.peso/100,
-                    "altura":campos.altura/100}});
-            } else {
-                return res.status(404).json({"Erro:":"Registro Não encontrado"});
-                
-            }
-        }
+    return respostaAtualizacao(res, resultado, {
+        "IMC": campos.imc / 100,
+        "Metabolismo Basal": campos.metabasal / 100,
+        "Biotipo":campos.biotipo
+    });
+
+
+})
+
+router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), async (req, res) => {
+    const { id } = req.params
+    const { campos } = req.body
+
+    if (!validarCampos(campos)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    const resultado = await atualizaDadosBasicos(id, campos);
+
+    return respostaAtualizacao(res, resultado, {
+        "peso": campos.peso / 100,
+        "altura": campos.altura / 100
+    });
+
 
 })
 
