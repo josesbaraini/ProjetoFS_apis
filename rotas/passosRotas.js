@@ -2,6 +2,8 @@ import express from "express";
 import { retornaPassos, retornaTodosPassos, retornaPassosOrdenados, retornaPassosNome } from "../services/retorno/retornaPassos.js";
 import { excluiPassoId, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaBodyID, validaParametroID } from "../services/validacoes/validaID.js";
+import { atualizaPasso, atualizaPassos } from "../services/atualizacao/atuzalizaPassos.js";
+import { respostaAtualizacao, respostaAtualizacaoMultipla, validarCampos } from "../services/validacoes/valida.js";
 
 const router = express.Router();
 
@@ -24,9 +26,6 @@ router.post("/user", validaBodyID("treino_Id"), async (req, res) => {
     const { treino_Id } = req.body
     let { ordem, nome } = req.query
     let Passos;
-    if (ehInteiro(id)) {
-        res.status(404).json({ mensagem: "Id fornecido é invalido." })
-    } else {
 
         if (ordem) {
             Passos = await retornaPassosOrdenados(treino_Id, ordem)
@@ -37,7 +36,45 @@ router.post("/user", validaBodyID("treino_Id"), async (req, res) => {
         }
 
         res.json(Passos);
-    }
 });
+
+router.patch("/:id", validaParametroID(), async (req, res) => {
+    const { passo } = req.body
+    const { id } = req.params
+    if (!validarCampos(passo)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    const resultado = await atualizaPasso(id, passo);
+
+    return respostaAtualizacao(res, resultado, {
+        "nome":passo.nome?passo.nome:"Dado Não Alterado",
+        "series":passo.series?passo.series:"Dado Não Alterado",
+        "repeticoes":passo.repeticoes?passo.repeticoes:"Dado Não Alterado",
+        "peso":passo.peso?passo.peso:"Dado Não Alterado"
+    });
+
+});
+
+router.patch("/treino/", async (req, res) => {
+    const {passos} = req.body;
+    if (passos.length <= 0) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    
+    const resultado = await atualizaPassos(passos);
+    const respostaFinal = []
+    for (const [index, resposta] of resultado.entries()) {
+        const item = respostaAtualizacaoMultipla(resposta, {
+            "id":passos[index].id?passos[index].id:"Dado Não Alterado",
+            "nome":passos[index].nome?passos[index].nome:"Dado Não Alterado",
+            "series":passos[index].series?passos[index].series:"Dado Não Alterado",
+            "repeticoes":passos[index].repeticoes?passos[index].repeticoes:"Dado Não Alterado",
+            "peso":passos[index].peso?passos[index].peso:"Dado Não Alterado"
+        });
+        respostaFinal.push(item)
+    }
+    return res.json(respostaFinal)
+
+})
 
 export default router;

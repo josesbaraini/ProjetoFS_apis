@@ -200,6 +200,21 @@ export function respostaAtualizacao(res, resultado, dadosExtras = {}) {
     }
 }
 
+
+export function respostaAtualizacaoMultipla(resultado, dadosExtras = {}) {
+    if (resultado.affectedRows > 0) {
+        return {
+            sucesso: true,
+            mensagem: "Registro atualizado com sucesso",
+            dados: dadosExtras
+        };
+    } else {
+        return {
+            sucesso: false,
+            erro: "Registro não encontrado"
+        };
+    }
+}
 function dataValida(str) {
     const data = dayjs(str, 'YYYY-MM-DD', true);
 

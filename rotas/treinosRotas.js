@@ -4,7 +4,9 @@ import { cadastraTreinos } from "../services/cadastro/cadastraTreinos.js";
 import { excluiTreinoId } from "../services/exclusao/excluiTreinos.js";
 import { excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaParametroID, validaBodyID } from "../services/validacoes/validaID.js";
-
+import { atualizaTreino } from "../services/atualizacao/atuzlizaTreinos.js";
+import { respostaAtualizacao, validarCampos } from "../services/validacoes/valida.js";
+import dayjs from "dayjs";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -51,4 +53,23 @@ router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
         res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
 })
+
+router.patch("/:id", validaParametroID(), async (req, res) => {
+    const { campos } = req.body
+    const { id } = req.params
+    if (!validarCampos(campos)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    campos["modificacao_em"] = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const resultado = await atualizaTreino(id, campos);
+
+    return respostaAtualizacao(res, resultado, {
+        "nome":campos.nome?campos.nome:"Dado Não Alterado",
+        "descricao":campos.descricao?campos.descricao:"Dado Não Alterado",
+        "anotacoes":campos.anotacoes?campos.anotacoes:"Dado Não Alterado",
+        "modificacao_em":campos["modificacao_em"]
+    });
+
+});
+
 export default router;

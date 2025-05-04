@@ -3,6 +3,8 @@ import { retornaNotificacoesId } from "../services/retorno/retornaNotificacoes.j
 import { cadastraNotificacao } from "../services/cadastro/cadastraNotificacoes.js";
 import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js";
 import { validaBodyID, validaParametroID } from "../services/validacoes/validaID.js";
+import { marcaNotificacaoLida } from "../services/atualizacao/atualizaNotificacoes.js";
+import { respostaAtualizacao } from "../services/validacoes/valida.js";
 const router = express.Router();
 
 router.get('/:id', validaParametroID(), async (req, res) => {
@@ -40,5 +42,15 @@ router.post('/cadastro', validaBodyID(), async (req, res) => {
 
 });
 
+router.patch("/:id", validaParametroID(), async (req, res) => {
+    const { id } = req.params
+
+    const resultado = await marcaNotificacaoLida(id);
+
+    return respostaAtualizacao(res, resultado, {
+        "lida":true
+    });
+
+});
 
 export default router;
