@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
+import { retornaFotoPerfil, retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
 import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validaDadosUsuario, validarCampos } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar } from "../services/validacoes/autenticar.js";
@@ -14,9 +14,11 @@ import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaParametroID } from "../services/validacoes/validaID.js";
-import { atualizaDadosAvancados, atualizaDadosBasicos, atualizaUsuario } from "../services/atualizacao/atualizaUsuario.js";
+import { atualizaDadosAvancados, atualizaDadosBasicos, atualizaFotoPerfil, atualizaUsuario } from "../services/atualizacao/atualizaUsuario.js";
+import upload from "../services/validacoes/perfilImagens.js";
+import path, { dirname } from "path"
 
-
+const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/C:\//, "/").replace("/rotas","");
 const router = express.Router();
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body
@@ -163,6 +165,24 @@ router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), asy
 
 
 })
+router.get("/fotoPerfil/:id", validaParametroID(), async (req, res) => {
+    const {id} = req.params
+    const [imageUrl] = await retornaFotoPerfil(id)
+    if (!imageUrl.fotoPerfil) {
+        return res.status(404).json({"mensagen":"Foto de perfil não encontrada"})
+    }
+    const imagemPerfil = path.resolve(`${__dirname}/uploads`, imageUrl.fotoPerfil);
+    return res.status(200).sendFile(imagemPerfil);
+})
+router.post('/fotoPerfil/:id',validaParametroID(), upload.single('profileImage'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'Nenhuma imagem enviada.' });
+    const {id} = req.params;
+    const imageUrl = `${req.file.filename}`;
+    const resultado = await atualizaFotoPerfil(id, imageUrl)
+    return respostaAtualizacao(res, resultado, {
+        "url":imageUrl
+    })
+  });
 router.patch('/:id', validaParametroID(), validaDadosUsuario(), async (req, res) => {
     const {id} = req.params;
     const {campos} = req.body;

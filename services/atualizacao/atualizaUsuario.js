@@ -32,3 +32,11 @@ export async function atualizaUsuario(id, campos) {
     conexao.release()
     return  resposta
 }
+
+export async function atualizaFotoPerfil(id, caminho) {
+    const conexao = await pool.getConnection();
+    const query = `UPDATE Usuarios SET fotoPerfil = ? where id = ?`
+    const [resposta] = await conexao.execute(query, [caminho, id])
+    conexao.release()
+    return resposta
+}

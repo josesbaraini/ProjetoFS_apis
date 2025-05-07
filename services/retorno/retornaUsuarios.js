@@ -31,3 +31,11 @@ export async function retornaUsuarioId(id) {
     conexao.release();
     return usuarios[0];  
 }
+
+export async function retornaFotoPerfil(id) {
+    const conexao = await pool.getConnection();
+    const query = `select fotoPerfil from Usuarios where id = ?`
+    const [resposta] = await conexao.execute(query, [id])
+    conexao.release()
+    return resposta
+}
