@@ -7,9 +7,9 @@ import { marcaNotificacaoLida } from "../services/atualizacao/atualizaNotificaco
 import { respostaAtualizacao } from "../services/validacoes/valida.js";
 const router = express.Router();
 
-router.get('/:id', validaParametroID(), async (req, res) => {
-    const id = req.params.id;
-    const notificacoes = await retornaNotificacoesId(id);
+router.get('/:idNotifica', validaParametroID("idNotifica"), async (req, res) => {
+    const {idNotifica} = req.params;
+    const notificacoes = await retornaNotificacoesId(idNotifica);
     if (notificacoes.length > 0) {
         res.json(notificacoes);
     } else {
@@ -28,10 +28,10 @@ router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
 
 })
 
-router.post('/cadastro', validaBodyID(), async (req, res) => {
-    const { nome, assunto, tipo, id } = req.body;
+router.post('/cadastro', validaBodyID("idNotifica"), async (req, res) => {
+    const { nome, assunto, tipo, idNotifica } = req.body;
 
-    const resposta = await cadastraNotificacao(nome, assunto, tipo, id)
+    const resposta = await cadastraNotificacao(nome, assunto, tipo, idNotifica)
     if (resposta.affectedRows > 0) {
         res.status(200).json({ mensagem: "Notificação cadastrada com sucesso.", "resposta": resposta })
     } else {
@@ -42,10 +42,10 @@ router.post('/cadastro', validaBodyID(), async (req, res) => {
 
 });
 
-router.patch("/:id", validaParametroID(), async (req, res) => {
-    const { id } = req.params
+router.patch("/:idNotifica", validaParametroID("idNotifica"), async (req, res) => {
+    const { idNotifica } = req.params
 
-    const resultado = await marcaNotificacaoLida(id);
+    const resultado = await marcaNotificacaoLida(idNotifica);
 
     return respostaAtualizacao(res, resultado, {
         "lida":true

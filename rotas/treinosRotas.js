@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 
-router.post("/user", validaBodyID('userId'), async (req, res) => {
+router.get("/user", validaBodyID('userId'), async (req, res) => {
     const { userId } = req.body
     let { ordem, nome } = req.query
     let treinos;
@@ -43,25 +43,25 @@ router.post("/cadastrar", validaBodyID('usuario_id'), async (req, res) => {
     const resposta = await cadastraTreinos(dados)
     res.json(resposta)
 })
-router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
-    const id = req.params.id;
-    const respostaP = await excluiPassos(id);
+router.delete('/deletar/:idTreino', validaParametroID("idTreino"), async (req, res) => {
+    const {idTreino} = req.params;
+    const respostaP = await excluiPassos(idTreino);
     if (respostaP.affectedRows > 0) {
-        const respostaT = await excluiTreinoId(id);
+        const respostaT = await excluiTreinoId(idTreino);
         res.status(200).json({ "resposta": respostaT, mensagem: "Treino deletado com sucesso." });
     } else {
         res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
 })
 
-router.patch("/:id", validaParametroID(), async (req, res) => {
+router.patch("/:idTreino", validaParametroID("idTreino"), async (req, res) => {
     const { campos } = req.body
-    const { id } = req.params
+    const { idTreino } = req.params
     if (!validarCampos(campos)) {
         return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
     }
     campos["modificacao_em"] = dayjs().format('YYYY-MM-DD HH:mm:ss');
-    const resultado = await atualizaTreino(id, campos);
+    const resultado = await atualizaTreino(idTreino, campos);
 
     return respostaAtualizacao(res, resultado, {
         "nome":campos.nome?campos.nome:"Dado Não Alterado",

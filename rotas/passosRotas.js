@@ -22,7 +22,7 @@ router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
         res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
 })
-router.post("/user", validaBodyID("treino_Id"), async (req, res) => {
+router.get("/user", validaBodyID("treino_Id"), async (req, res) => {
     const { treino_Id } = req.body
     let { ordem, nome } = req.query
     let Passos;
@@ -38,22 +38,7 @@ router.post("/user", validaBodyID("treino_Id"), async (req, res) => {
         res.json(Passos);
 });
 
-router.patch("/:id", validaParametroID(), async (req, res) => {
-    const { passo } = req.body
-    const { id } = req.params
-    if (!validarCampos(passo)) {
-        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
-    }
-    const resultado = await atualizaPasso(id, passo);
 
-    return respostaAtualizacao(res, resultado, {
-        "nome":passo.nome?passo.nome:"Dado Não Alterado",
-        "series":passo.series?passo.series:"Dado Não Alterado",
-        "repeticoes":passo.repeticoes?passo.repeticoes:"Dado Não Alterado",
-        "peso":passo.peso?passo.peso:"Dado Não Alterado"
-    });
-
-});
 
 router.patch("/treino/", async (req, res) => {
     const {passos} = req.body;
@@ -76,5 +61,22 @@ router.patch("/treino/", async (req, res) => {
     return res.json(respostaFinal)
 
 })
+
+router.patch("/:idPasso", validaParametroID("idPasso"), async (req, res) => {
+    const { passo } = req.body
+    const { idPasso } = req.params
+    if (!validarCampos(passo)) {
+        return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
+    }
+    const resultado = await atualizaPasso(idPasso, passo);
+
+    return respostaAtualizacao(res, resultado, {
+        "nome":passo.nome?passo.nome:"Dado Não Alterado",
+        "series":passo.series?passo.series:"Dado Não Alterado",
+        "repeticoes":passo.repeticoes?passo.repeticoes:"Dado Não Alterado",
+        "peso":passo.peso?passo.peso:"Dado Não Alterado"
+    });
+
+});
 
 export default router;

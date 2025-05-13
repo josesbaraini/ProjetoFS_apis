@@ -10,10 +10,13 @@ export function validaParametroID(paramName = 'id'){
   
 
   req.params[paramName] = Number(value);
-  const result  = await retornaUsuarioId(req.params[paramName])
-  if (result.length < 1) {
-    return res.status(400).json({ error: `Id de Usuario não encontrado no sistema` });
+  if (paramName == "id") {
+    const result  = await retornaUsuarioId(req.params[paramName])
+    if (result.length < 1) {
+      return res.status(400).json({ error: `Id de Usuario não encontrado no sistema` });
+    }
   }
+
   next();}
 }
 

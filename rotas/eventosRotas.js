@@ -65,14 +65,14 @@ router.post('/cadastro', validaBodyID(), async (req, res) => {
     }
 });
 
-router.patch('/:id', validaParametroID(), validaDadosEventos(), async (req, res) => {
-    const { id } = req.params
+router.patch('/:idEvento', validaParametroID(), validaDadosEventos(), async (req, res) => {
+    const { idEvento } = req.params
     const { campos } = req.body
 
     if (!validarCampos(campos)) {
         return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
     }
-    const resultado = await atualizaEvento(id, campos);
+    const resultado = await atualizaEvento(idEvento, campos);
 
     return respostaAtualizacao(res, resultado, {
         "nome":campos.nome?campos.nome:"Dado Não Alterado",
