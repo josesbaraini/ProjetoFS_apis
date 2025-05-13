@@ -1,3 +1,4 @@
 /.env
 /node_modules
-/teste.js
+teste.js
+/uploads

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { retornaFotoPerfil, retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
 import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validaDadosUsuario, validarCampos } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
-import { autenticar } from "../services/validacoes/autenticar.js";
+import { autenticar, autenticarAcao } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
 import { retornaDadosAvancados, retornaDadosBasicos } from "../services/retorno/retornaDadosUsuario.js";
 import { cadastraDadosAvancados, cadastraDadosBasicos } from "../services/cadastro/cadastraDadosUsuario.js";
@@ -23,6 +23,7 @@ const router = express.Router();
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body
     const usuario = await retornaParaLogin(email)
+    console.log(usuario.senha, senha)
     if (!usuario) {
         res.status(401).json({ error: "usuario não encontrado" })
 
@@ -31,7 +32,10 @@ router.post("/login", async (req, res) => {
     if (!senhaCorreta) {
         res.status(401).json({ error: "senha incorreta." })
     } else {
-        const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ 
+            id: usuario.id,
+            email: usuario.email,
+            role: usuario.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
             httpOnly: true,
             secure: false,
@@ -58,7 +62,10 @@ router.post('/cadastro', async (req, res) => {
             return res.status(409).json({ erro: "O e-mail já está cadastrado. Tente outro e-mail." })
         } else {
             const usuario = await retornaParaLogin(email)
-            const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({ 
+                id: user.id,
+                email: user.email,
+                role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
             await cadastraDadosBasicos(usuario.id);
             await cadastraDadosAvancados(usuario.id);
 
@@ -73,8 +80,8 @@ router.post('/cadastro', async (req, res) => {
         return valida
     }
 })
-router.get("/informacoes/:id", validaParametroID(), async (req, res) => {
-    const id = req.params.id;
+router.get("/informacoes/:id", validaParametroID(), autenticarAcao, async (req, res) => {
+    const {id} = req.params;
     const usuario = await retornaUsuarioId(id);
     if (usuario.affectedRows > 0) {
         res.json(usuario[0]);
@@ -83,7 +90,7 @@ router.get("/informacoes/:id", validaParametroID(), async (req, res) => {
     }
 })
 
-router.delete("/deletar/:id", validaParametroID(), async (req, res) => {
+router.delete("/deletar/:id", validaParametroID(),autenticarAcao, async (req, res) => {
     const id = req.params.id;
     let resposta = []
     let respostaI;
@@ -111,7 +118,7 @@ router.delete("/deletar/:id", validaParametroID(), async (req, res) => {
     }
 })
 
-router.get('/dadosbasicos/:id', validaParametroID(), async (req, res) => {
+router.get('/dadosbasicos/:id', validaParametroID(),autenticarAcao, async (req, res) => {
     const id = req.params.id;
     const usuario = await retornaDadosBasicos(id);
     if (usuario.length > 0) {
@@ -121,7 +128,7 @@ router.get('/dadosbasicos/:id', validaParametroID(), async (req, res) => {
     }
 })
 
-router.get('/dadosavancados/:id', validaParametroID(), async (req, res) => {
+router.get('/dadosavancados/:id', validaParametroID(),autenticarAcao, async (req, res) => {
     const id = req.params.id;
     const usuario = await retornaDadosAvancados(id);
     if (usuario.length > 0) {
@@ -132,7 +139,7 @@ router.get('/dadosavancados/:id', validaParametroID(), async (req, res) => {
 
 })
 
-router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(), async (req, res)=>{
+router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(),autenticarAcao, async (req, res)=>{
     const { id } = req.params
     const { campos } = req.body
     if (!validarCampos(campos)) {
@@ -149,7 +156,7 @@ router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(),
 
 })
 
-router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), async (req, res) => {
+router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(),autenticarAcao, async (req, res) => {
     const { id } = req.params
     const { campos } = req.body
 
@@ -165,7 +172,7 @@ router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), asy
 
 
 })
-router.get("/fotoPerfil/:id", validaParametroID(), async (req, res) => {
+router.get("/fotoPerfil/:id", validaParametroID(),autenticarAcao, async (req, res) => {
     const {id} = req.params
     const [imageUrl] = await retornaFotoPerfil(id)
     if (!imageUrl.fotoPerfil) {
@@ -174,7 +181,7 @@ router.get("/fotoPerfil/:id", validaParametroID(), async (req, res) => {
     const imagemPerfil = path.resolve(`${__dirname}/uploads`, imageUrl.fotoPerfil);
     return res.status(200).sendFile(imagemPerfil);
 })
-router.post('/fotoPerfil/:id',validaParametroID(), upload.single('profileImage'), async (req, res) => {
+router.post('/fotoPerfil/:id',validaParametroID(),autenticarAcao, upload.single('profileImage'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Nenhuma imagem enviada.' });
     const {id} = req.params;
     const imageUrl = `${req.file.filename}`;
@@ -183,7 +190,7 @@ router.post('/fotoPerfil/:id',validaParametroID(), upload.single('profileImage')
         "url":imageUrl
     })
   });
-router.patch('/:id', validaParametroID(), validaDadosUsuario(), async (req, res) => {
+router.patch('/:id', validaParametroID(), validaDadosUsuario(),autenticarAcao, async (req, res) => {
     const {id} = req.params;
     const {campos} = req.body;
 

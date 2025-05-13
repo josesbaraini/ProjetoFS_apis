@@ -9,7 +9,7 @@ async function executaQuery(conexao,query) {
 
 export async function retornaParaLogin(email) {
     const conexao = await pool.getConnection();
-    const query = "SELECT id, email, senha from Usuarios WHERE email = ?"
+    const query = "SELECT id, email, senha, role from Usuarios WHERE email = ?"
     const resultado_query = await conexao.execute(query,[email])
     const resposta = resultado_query[0][0]
     return resposta
