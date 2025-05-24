@@ -16,25 +16,6 @@ Este projeto foi desenvolvido com fins educacionais, simulando a estrutura de um
 - [cors](https://www.npmjs.com/package/cors)
 - [mysql2](https://www.npmjs.com/package/mysql2)
 
-## 📁 Estrutura do Projeto
-
-```bash
-ProjetoFS_apis/
-├── controllers/
-│   └── user.controller.js
-├── routes/
-│   └── auth.routes.js
-├── services/
-│   └── auth.service.js
-├── validations/
-│   └── user.validation.js
-├── utils/
-│   └── db.js
-├── .env.example
-├── app.js
-└── package.json
-🔐 Funcionalidades
-Cadastro de usuários
 
 Login com validação de credenciais
 
