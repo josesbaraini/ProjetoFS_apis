@@ -1,4 +1,4 @@
-# ProjetoFS_apis
+#MyGym_apis
 
 API RESTful criada com **Node.js**, **Express** e **MySQL**, com foco em autenticação e gerenciamento de usuários.
 
