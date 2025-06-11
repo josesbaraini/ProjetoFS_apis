@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 
-router.get("/user", validaBodyID('userId'), async (req, res) => {
+router.post("/user", validaBodyID('userId'), async (req, res) => {
     const { userId } = req.body
     let { ordem, nome } = req.query
     let treinos;
