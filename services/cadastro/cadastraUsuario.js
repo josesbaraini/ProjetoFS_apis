@@ -11,9 +11,8 @@ export async function cadastraUsuario(nome, email, senha, telefone) {
         }
         
     } catch (error) {
-        
         conexao.release();
-        return error
+        throw  error
         
     }
     

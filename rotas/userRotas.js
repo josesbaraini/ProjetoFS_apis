@@ -17,13 +17,13 @@ import { validaParametroID } from "../services/validacoes/validaID.js";
 import { atualizaDadosAvancados, atualizaDadosBasicos, atualizaFotoPerfil, atualizaUsuario } from "../services/atualizacao/atualizaUsuario.js";
 import upload from "../services/validacoes/perfilImagens.js";
 import path, { dirname } from "path"
+import { tratamendoErros } from "../services/validacoes/tratamentoErros.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/C:\//, "/").replace("/rotas","");
 const router = express.Router();
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body
     const usuario = await retornaParaLogin(email)
-    console.log(usuario.senha, senha)
     if (!usuario) {
         res.status(401).json({ error: "usuario não encontrado" })
 
@@ -55,17 +55,18 @@ router.post('/cadastro', async (req, res) => {
     const { nome, email, telefone, senhaD } = req.body;
     const valida = validaDados(res, nome, email, telefone)
     if (!valida) {
-        const senha = await bcrypt.hash(senhaD, 10)
-        const resultado = await cadastraUsuario(nome, email, senha, telefone)
 
-        if (resultado.errno == 1062) {
-            return res.status(409).json({ erro: "O e-mail já está cadastrado. Tente outro e-mail." })
-        } else {
+        
+        try {
+            const senha = await bcrypt.hash(senhaD, 10)
+            const resultado = await cadastraUsuario(nome, email, senha, telefone)
+            console.log(resultado)
+
             const usuario = await retornaParaLogin(email)
             const token = jwt.sign({ 
-                id: user.id,
-                email: user.email,
-                role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                id: usuario.id,
+                email: usuario.email,
+                role: usuario.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
             await cadastraDadosBasicos(usuario.id);
             await cadastraDadosAvancados(usuario.id);
 
@@ -75,7 +76,11 @@ router.post('/cadastro', async (req, res) => {
                 sameSite: "lax"
             });
             res.status(201).json({ "usuario": usuario, 'token': token, "mensagem": "Usuário cadastrado com sucesso." })
+            
+        } catch (error) {
+            tratamendoErros(res, error)
         }
+            
     } else {
         return valida
     }
