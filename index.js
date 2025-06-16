@@ -7,11 +7,18 @@ import passosRotas from "./rotas/passosRotas.js";
 import notificacoesRotas from "./rotas/notificacoesRotas.js"
 import eventosRotas from './rotas/eventosRotas.js'
 import cookieParser from "cookie-parser";
+const origemsPermitidas = ["https://mygym.dev.vilhena.ifro.edu.br","http://26.94.3.187:3000"]
 
 const app = express();
 app.use(cookieParser())
 app.use(cors({
-    origin:"https://mygym.dev.vilhena.ifro.edu.br",
+    origin: (origin, callback) => {
+        if (!origin || origemsPermitidas.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Origem não permitida pelo CORS'));
+        }
+      },
     credentials:true
 }));
 
