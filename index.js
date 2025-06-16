@@ -11,6 +11,7 @@ import cookieParser from "cookie-parser";
 const app = express();
 app.use(cookieParser())
 app.use(cors({
+    origin:"https://mygym.dev.vilhena.ifro.edu.br",
     credentials:true
 }));
 
