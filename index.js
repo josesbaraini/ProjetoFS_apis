@@ -8,10 +8,7 @@ import notificacoesRotas from "./rotas/notificacoesRotas.js"
 import eventosRotas from './rotas/eventosRotas.js'
 import cookieParser from "cookie-parser";
 const origemsPermitidas = ["https://mygym.dev.vilhena.ifro.edu.br","http://26.94.3.187:3000"]
-
-const app = express();
-app.use(cookieParser())
-app.use(cors({
+const corsOptions = {
     origin: (origin, callback) => {
         if (!origin || origemsPermitidas.includes(origin)) {
           callback(null, true);
@@ -20,8 +17,13 @@ app.use(cors({
         }
       },
     credentials:true
-}));
+}
+const app = express();
 
+
+app.use(cookieParser())
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json())
 app.use("/api/user", userRotas);
 app.use("/api/adm", admRotas);
