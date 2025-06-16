@@ -11,7 +11,7 @@ const origemsPermitidas = ["https://mygym.dev.vilhena.ifro.edu.br","http://26.94
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin || origemsPermitidas.includes(origin)) {
-          callback(null, true);
+          callback(null, origin);
         } else {
           callback(new Error('Origem não permitida pelo CORS'));
         }
