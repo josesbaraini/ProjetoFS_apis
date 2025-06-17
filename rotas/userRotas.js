@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
     const { email, senha } = req.body
     const usuario = await retornaParaLogin(email)
     if (!usuario) {
-        res.status(401).json({ error: "usuario não encontrado" })
+        return res.status(401).json({ error: "usuario não encontrado" })
 
     }
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha)
