@@ -7,7 +7,7 @@ import passosRotas from "./rotas/passosRotas.js";
 import notificacoesRotas from "./rotas/notificacoesRotas.js"
 import eventosRotas from './rotas/eventosRotas.js'
 import cookieParser from "cookie-parser";
-const origemsPermitidas = ["https://mygym.dev.vilhena.ifro.edu.br","http://26.94.3.187:3000"]
+const origemsPermitidas = ["https://mygym.dev.vilhena.ifro.edu.br","http://26.94.3.187:3000","http://10.82.3.236:3000"]
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin || origemsPermitidas.includes(origin)) {
@@ -20,11 +20,13 @@ const corsOptions = {
 }
 const app = express();
 
-
-app.use(cookieParser())
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.use(cookieParser())
 app.use(express.json())
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 app.use("/api/user", userRotas);
 app.use("/api/adm", admRotas);
 app.use('/api/treinos', treinosRotas )
