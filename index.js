@@ -9,7 +9,10 @@ import eventosRotas from './rotas/eventosRotas.js'
 import cookieParser from "cookie-parser";
 
 const app = express();
-
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', "https://mygym.dev.vilhena.ifro.edu.br");
+  next();
+});
 app.use(cors({
   origin:"https://mygym.dev.vilhena.ifro.edu.br",
   credentials:true
