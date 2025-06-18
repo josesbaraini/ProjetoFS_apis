@@ -36,6 +36,7 @@ router.post("/login", async (req, res) => {
             id: usuario.id,
             email: usuario.email,
             role: usuario.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.setHeader("Access-Control-Allow-Origin", 'https://mygym.dev.vilhena.ifro.edu.br');
         res.cookie('token', token, {
             httpOnly: true,
             secure: false,
