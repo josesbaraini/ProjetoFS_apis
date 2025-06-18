@@ -10,7 +10,7 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', "https://mygym.dev.vilhena.ifro.edu.br");
+  res.header('Access-Control-Allow-Origin', "https://mygym.dev.vilhena.ifro.edu.br");
   next();
 });
 app.use(cors({
