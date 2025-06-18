@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
             role: usuario.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: "lax"
         });
         res.status(200).json({ usuario: usuario, token: token, mensagem: 'Logado com sucesso' })
