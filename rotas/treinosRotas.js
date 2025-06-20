@@ -16,9 +16,9 @@ router.get("/", async (req, res) => {
 });
 
 
-router.post("/user", validaBodyID('userId'), async (req, res) => {
-    const { userId } = req.body
-    let { ordem, nome } = req.query
+router.get("/user/:userId", validaParametroID("userId"), async (req, res) => {
+    const { userId } = req.params
+    const { ordem, nome } = req.query
     let treinos;
     if (ordem) {
         treinos = await retornaTreinosOrdenados(userId, ordem)
