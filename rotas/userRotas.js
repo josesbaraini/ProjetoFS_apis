@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get('/autenticar', autenticar, (req, res) => {
-    res.json({ mensagem: "Dados Autenticados" ,ok:true})
+    res.json({ mensagem: "Dados Autenticados" ,ok:true, usuario: req.user})
 })
 
 router.post('/cadastro', async (req, res) => {
