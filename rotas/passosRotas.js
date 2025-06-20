@@ -1,6 +1,6 @@
 import express from "express";
 import { retornaPassos, retornaTodosPassos, retornaPassosOrdenados, retornaPassosNome } from "../services/retorno/retornaPassos.js";
-import { excluiPassoId, excluiPassos } from "../services/exclusao/excluiPassos.js";
+import { excluiPassoId} from "../services/exclusao/excluiPassos.js";
 import { validaBodyID, validaParametroID } from "../services/validacoes/validaID.js";
 import { atualizaPasso, atualizaPassos } from "../services/atualizacao/atuzalizaPassos.js";
 import { respostaAtualizacao, respostaAtualizacaoMultipla, validarCampos } from "../services/validacoes/valida.js";
