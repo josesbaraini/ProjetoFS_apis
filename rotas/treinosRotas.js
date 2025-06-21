@@ -1,5 +1,5 @@
 import express from "express";
-import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome } from "../services/retorno/retornaTreinos.js";
+import { retornaTreinos, retornaTodosTreinos, retornaTreinosOrdenados, retornaTreinosNome, retornaTreinosComFiltros } from "../services/retorno/retornaTreinos.js";
 import { cadastraTreinos } from "../services/cadastro/cadastraTreinos.js";
 import { excluiTreinoId } from "../services/exclusao/excluiTreinos.js";
 import { excluiPassos } from "../services/exclusao/excluiPassos.js";
@@ -15,18 +15,16 @@ router.get("/", async (req, res) => {
     res.json(treinos);
 });
 
-
 router.get("/user/:userId", validaParametroID("userId"), async (req, res) => {
     const { userId } = req.params
     const { ordem, nome } = req.query
+
     let treinos;
-    if (ordem) {
-        treinos = await retornaTreinosOrdenados(userId, ordem)
-    } else if (nome) {
-        treinos = await retornaTreinosNome(userId, nome)
-    } else {
-        treinos = await retornaTreinos(userId)
-    }
+
+    // Usa a nova função que combina pesquisa e ordenação
+    treinos = await retornaTreinosComFiltros(userId, nome, ordem);
+
+
     res.json(treinos);
 });
 
@@ -39,12 +37,12 @@ router.post("/cadastrar", validaBodyID('usuario_id'), async (req, res) => {
         "anotacoes": anotacoes,
         "passos": passos
     }
-    console.log(dados);
     const resposta = await cadastraTreinos(dados)
     res.json(resposta)
 })
+
 router.delete('/deletar/:idTreino', validaParametroID("idTreino"), async (req, res) => {
-    const {idTreino} = req.params;
+    const { idTreino } = req.params;
     const respostaP = await excluiPassos(idTreino);
     if (respostaP.affectedRows > 0) {
         const respostaT = await excluiTreinoId(idTreino);
@@ -64,10 +62,10 @@ router.patch("/:idTreino", validaParametroID("idTreino"), async (req, res) => {
     const resultado = await atualizaTreino(idTreino, campos);
 
     return respostaAtualizacao(res, resultado, {
-        "nome":campos.nome?campos.nome:"Dado Não Alterado",
-        "descricao":campos.descricao?campos.descricao:"Dado Não Alterado",
-        "anotacoes":campos.anotacoes?campos.anotacoes:"Dado Não Alterado",
-        "modificacao_em":campos["modificacao_em"]
+        "nome": campos.nome ? campos.nome : "Dado Não Alterado",
+        "descricao": campos.descricao ? campos.descricao : "Dado Não Alterado",
+        "anotacoes": campos.anotacoes ? campos.anotacoes : "Dado Não Alterado",
+        "modificacao_em": campos["modificacao_em"]
     });
 
 });
