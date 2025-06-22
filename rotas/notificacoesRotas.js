@@ -18,7 +18,7 @@ router.get('/:idNotifica', validaParametroID("idNotifica"), async (req, res) => 
 })
 
 router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
-    const id = req.params.id;
+    const {id} = req.params;
     const resposta = await excluiNotificacoesId(id);
     if (resposta.affectedRows > 0) {
         res.status(200).json({ "resposta": resposta, mensagem: "Notificação deletado com sucesso." });
@@ -28,10 +28,11 @@ router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
 
 })
 
-router.post('/cadastro', validaBodyID("idNotifica"), async (req, res) => {
-    const { nome, assunto, tipo, idNotifica } = req.body;
+router.post('/cadastro/:id', validaParametroID(), async (req, res) => {
+    const { nome, assunto, tipo} = req.body;
+    const {id} = req.params
 
-    const resposta = await cadastraNotificacao(nome, assunto, tipo, idNotifica)
+    const resposta = await cadastraNotificacao(nome, assunto, tipo, id)
     if (resposta.affectedRows > 0) {
         res.status(200).json({ mensagem: "Notificação cadastrada com sucesso.", "resposta": resposta })
     } else {

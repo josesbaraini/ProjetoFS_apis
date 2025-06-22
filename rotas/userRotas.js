@@ -45,7 +45,14 @@ router.post("/login", async (req, res) => {
     }
 
 });
-
+router.post('/desconectar', (req, res) => {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    });
+    res.status(200).json({ mensagem: 'Logout realizado com sucesso' });
+  });
 router.get('/autenticar', autenticar, (req, res) => {
     res.json({ mensagem: "Dados Autenticados" ,ok:true, usuario: req.user})
 })
