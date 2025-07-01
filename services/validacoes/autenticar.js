@@ -26,8 +26,9 @@ export async function autenticarAcao(req, res, next) {
     const token = req.cookies.token;
     const {id} = req.params 
     if (!token) {
+        console.log(token)
         return res.status(401).json({
-            'erro': 'Não Autorizado'
+            'erro': 'Ação Não Autorizada'
         })
     }
     try {

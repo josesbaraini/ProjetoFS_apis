@@ -130,7 +130,7 @@ router.delete("/deletar/:id", validaParametroID(),autenticarAcao, async (req, re
     }
 })
 
-router.get('/dadosbasicos/:id', validaParametroID(),autenticarAcao, async (req, res) => {
+router.get('/dadosbasicos/:id', validaParametroID(), autenticarAcao, async (req, res) => {
     const id = req.params.id;
     const usuario = await retornaDadosBasicos(id);
     if (usuario.length > 0) {
