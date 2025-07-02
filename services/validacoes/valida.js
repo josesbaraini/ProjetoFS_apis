@@ -193,7 +193,8 @@ export function respostaAtualizacao(res, resultado, dadosExtras = {}) {
     if (resultado.affectedRows > 0) {
         return res.status(202).json({
             "Mensagen:": "Registro atualizado com sucesso",
-            "Dados Alterados": dadosExtras
+            "Dados Alterados": dadosExtras,
+            'ok':true
         });
     } else {
         return res.status(404).json({ "Erro:": "Registro Não encontrado" });
