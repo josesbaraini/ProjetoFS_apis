@@ -4,11 +4,23 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const pool = mysql.createPool({
-    port:process.env.DB_PORT,
+    port: process.env.DB_PORT,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
+    // Configurações para evitar ECONNRESET
+    acquireTimeout: 60000, // 60 segundos para adquirir conexão
+    timeout: 60000, // 60 segundos timeout
+    reconnect: true, // Reconectar automaticamente
+    connectionLimit: 10, // Máximo de conexões no pool
+    queueLimit: 0, // Sem limite na fila
+    waitForConnections: true, // Esperar por conexões disponíveis
+    // Configurações do MySQL
+    charset: 'utf8mb4',
+    // Configurações de keep-alive
+    keepAliveInitialDelay: 0,
+    enableKeepAlive: true
 });
 
 export default pool;
