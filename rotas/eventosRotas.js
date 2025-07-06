@@ -18,7 +18,7 @@ router.get('/pegarlista/:id', validaParametroID(), async (req, res) => {
     };
 });
 
-router.get('/pelomes/:id', validaParametroID(), async (req, res) => {
+router.post('/pelomes/:id', validaParametroID(), async (req, res) => {
     const { id } = req.params;
     const { mes } = req.body;
     const eventos = await retornaEventosMes(id, mes);
@@ -65,7 +65,7 @@ router.post('/cadastro', validaBodyID(), async (req, res) => {
     }
 });
 
-router.patch('/:idEvento', validaParametroID(), validaDadosEventos(), async (req, res) => {
+router.patch('/:idEvento', validaParametroID("idEvento"), validaDadosEventos(), async (req, res) => {
     const { idEvento } = req.params
     const { campos } = req.body
 
