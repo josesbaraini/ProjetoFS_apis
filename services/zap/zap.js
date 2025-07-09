@@ -1,8 +1,8 @@
 // whatsapp.js
 export default async function enviarWhatsapp(mensagem) {
-    const instanceId = 'instance130414';
-    const token = '1wcvxn4e6tkrry4k';
-    const numero = '5569981179389';
+    const instanceId = process.env.WHATSZAP_TOKEN;
+    const token = process.env.WHATSZAP_INSTANCE;
+    const numero = process.env.WHATSZAP_NUMBER;
   
     const url = `https://api.ultramsg.com/${instanceId}/messages/chat?token=${token}&to=${numero}&body=${encodeURIComponent(mensagem)}`;
   
@@ -15,4 +15,6 @@ export default async function enviarWhatsapp(mensagem) {
     }
     
   }
+
+
   
