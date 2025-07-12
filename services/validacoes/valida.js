@@ -40,6 +40,107 @@ export function validaDadosBasicos() {
     };
 }
 
+export function validaDadosPessoais() {
+    return (req, res, next) => {
+        const { campos } = req.body;
+        const camposValidados = {};
+
+        // Regex para validação
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const telefoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
+        const nomeRegex = /^[a-zA-ZÀ-ÿ\s]{2,50}$/;
+
+        // Validação do nome
+        if (campos?.nome !== undefined) {
+            const nomeLimpo = String(campos.nome).trim();
+            if (!nomeRegex.test(nomeLimpo)) {
+                return res.status(400).json({
+                    erro: "Nome fornecido é inválido. Deve conter apenas letras e espaços, entre 2 e 50 caracteres."
+                });
+            }
+            camposValidados.nome = nomeLimpo;
+        }
+
+        // Validação do telefone
+        if (campos?.telefone !== undefined) {
+            const telefoneLimpo = String(campos.telefone).trim();
+            if (!telefoneRegex.test(telefoneLimpo)) {
+                return res.status(400).json({
+                    erro: "Telefone fornecido é inválido. Use o formato (XX) XXXXX-XXXX."
+                });
+            }
+            camposValidados.telefone = telefoneLimpo;
+        }
+
+        // Validação do email
+        if (campos?.email !== undefined) {
+            const emailLimpo = String(campos.email).trim();
+            if (!emailRegex.test(emailLimpo)) {
+                return res.status(400).json({
+                    erro: "Email fornecido é inválido. Insira um email válido."
+                });
+            }
+            camposValidados.email = emailLimpo;
+        }
+
+        // Validação da data de nascimento
+        if (campos?.dataNascimento !== undefined) {
+            const dataLimpa = String(campos.dataNascimento).trim();
+
+            // Aceita tanto formato DD/MM/YYYY quanto YYYY-MM-DD
+            let dataFormatada;
+            if (dataLimpa.includes('/')) {
+                // Converte DD/MM/YYYY para YYYY-MM-DD
+                const partes = dataLimpa.split('/');
+                if (partes.length === 3) {
+                    dataFormatada = `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+                } else {
+                    return res.status(400).json({
+                        erro: "Data de nascimento fornecida é inválida. Use o formato DD/MM/YYYY ou YYYY-MM-DD."
+                    });
+                }
+            } else {
+                dataFormatada = dataLimpa;
+            }
+
+            if (!dataValida(dataFormatada)) {
+                return res.status(400).json({
+                    erro: "Data de nascimento fornecida é inválida. Deve ser uma data válida entre 1900 e hoje."
+                });
+            }
+            camposValidados.data_nascimento = dataFormatada;
+        }
+
+        // Mescla com campos existentes se houver
+        req.body.campos = { ...req.body.campos, ...camposValidados };
+        next();
+    };
+}
+
+export function validaSenha() {
+    return async (req, res, next) => {
+        const { campos } = req.body;
+        const camposValidados = {};
+
+        const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (campos?.senha !== undefined) {
+            const senhaLimpa = String(campos.senha).trim();
+            if (!senhaRegex.test(senhaLimpa)) {
+                return res.status(400).json({
+                    erro: "Senha fornecida é inválida. Deve conter pelo menos 8 caracteres, incluindo maiúscula, minúscula, número e caractere especial."
+                });
+            }
+            const senhaCriptografada = await bcrypt.hash(senhaLimpa, 10);
+            camposValidados.senha = senhaCriptografada;
+        }
+
+        // Mescla com campos existentes se houver
+        req.body.campos = { ...req.body.campos, ...camposValidados };
+        next();
+    };
+}
+
 export function validaDadosAvancados() {
     return (req, res, next) => {
         const { metabasal, biotipo, imc } = req.body;
@@ -78,7 +179,7 @@ export function validaDadosAvancados() {
     };
 }
 
-export function  validaDadosUsuario() {
+export function validaDadosUsuario() {
     return async (req, res, next) => {
         const { email, nome, role, senha, dataNascimento, telefone } = req.body
         const campos = {}
@@ -86,7 +187,6 @@ export function  validaDadosUsuario() {
         const telefoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
         const nomeRegex = /^.{2,}$/
         const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
-        const cargosValidos = ["admin", "user"]
         if (email !== undefined) {
             const emailLimpo = String(email).trim()
             if (!emailRegex.test(emailLimpo)) {
@@ -108,24 +208,17 @@ export function  validaDadosUsuario() {
             }
             campos.telefone = telefone
         }
-        if (role !== undefined) {
-            const cargo = String(role).trim().toLowerCase();
-            if (!cargosValidos.includes(cargo)) {
-                return res.status(400).json({ erro: "Cargo fornecido é inválido." });
-            }
-            campos.role = cargo;
-        }
-        if(senha !== undefined){
+        if (senha !== undefined) {
             const senhaLimpa = String(senha).trim();
             if (!senhaRegex.test(senhaLimpa)) {
                 return res.status(400).json({ erro: "Senha fornecida é inválida." });
             }
-            const senhaC =  await bcrypt.hash(senhaLimpa, 10)
+            const senhaC = await bcrypt.hash(senhaLimpa, 10)
             campos.senha = senhaC
         }
         if (dataNascimento !== undefined) {
             const dataNascimentoLimpo = String(dataNascimento).trim();
-            if(!dataValida(dataNascimentoLimpo)){
+            if (!dataValida(dataNascimentoLimpo)) {
                 return res.status(400).json({ erro: "Data de nascimento fornecida é inválida." });
             }
             campos["data_nascimento"] = dataNascimentoLimpo;
@@ -136,19 +229,19 @@ export function  validaDadosUsuario() {
 }
 
 export function validaDadosEventos() {
-    return async (req, res, next)=>{
+    return async (req, res, next) => {
         const campos = {}
-        const {nome, descricao, data} = req.body
+        const { nome, descricao, data } = req.body
         if (nome !== undefined) {
             const nomeLimpo = String(nome).trim();
-            if(!nomeRegex.test(nomeLimpo)){
+            if (!nomeRegex.test(nomeLimpo)) {
                 return res.status(400).json({ erro: "Nome fornecido é inválido." });
             }
             campos.nome = nomeLimpo
         }
         if (descricao !== undefined) {
             const descricaoLimpo = String(descricao).trim();
-            if(!nomeRegex.test(descricaoLimpo)){
+            if (!nomeRegex.test(descricaoLimpo)) {
                 return res.status(400).json({ erro: "Descrição fornecida é inválida." });
             }
             campos.descricao = descricaoLimpo
@@ -194,7 +287,7 @@ export function respostaAtualizacao(res, resultado, dadosExtras = {}) {
         return res.status(202).json({
             "Mensagen:": "Registro atualizado com sucesso",
             "Dados Alterados": dadosExtras,
-            'ok':true
+            'ok': true
         });
     } else {
         return res.status(404).json({ "Erro:": "Registro Não encontrado" });

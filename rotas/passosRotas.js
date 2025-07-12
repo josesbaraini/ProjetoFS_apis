@@ -22,7 +22,7 @@ router.delete('/deletar/:id', validaParametroID(), async (req, res) => {
         res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
     }
 })
-router.get("/user", validaBodyID("treino_Id"), async (req, res) => {
+router.post("/user", validaBodyID("treino_Id"), async (req, res) => {
     const { treino_Id } = req.body
     let { ordem, nome } = req.query
     let Passos;

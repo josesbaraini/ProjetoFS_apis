@@ -31,6 +31,14 @@ export async function retornaUsuarioId(id) {
     return usuarios[0];
 }
 
+export async function retornaUsuarioLastCheck(id) {
+    const conexao = await pool.getConnection();
+    const query = 'SELECT last_check FROM Usuarios WHERE id = ?';
+    const usuarios = await conexao.execute(query, [id])
+    conexao.release();
+    return usuarios[0];
+}
+
 export async function retornaFotoPerfil(id) {
     const conexao = await pool.getConnection();
     const query = `select fotoPerfil from Usuarios where id = ?`

@@ -8,7 +8,7 @@ export async function atualizaDadosBasicos(id, campos) {
     valores.push(id)
     const [resposta] = await conexao.execute(query, valores)
     conexao.release()
-    return  resposta
+    return resposta
 }
 
 export async function atualizaDadosAvancados(id, campos) {
@@ -19,7 +19,7 @@ export async function atualizaDadosAvancados(id, campos) {
     valores.push(id)
     const [resposta] = await conexao.execute(query, valores)
     conexao.release()
-    return  resposta
+    return resposta
 }
 
 export async function atualizaUsuario(id, campos) {
@@ -30,7 +30,7 @@ export async function atualizaUsuario(id, campos) {
     valores.push(id)
     const [resposta] = await conexao.execute(query, valores)
     conexao.release()
-    return  resposta
+    return resposta
 }
 
 export async function atualizaFotoPerfil(id, caminho) {
@@ -40,3 +40,31 @@ export async function atualizaFotoPerfil(id, caminho) {
     conexao.release()
     return resposta
 }
+
+export async function atualizaDadosPessoais(id, campos) {
+    const conexao = await pool.getConnection();
+    const colunas = Object.keys(campos).map(campo => `${campo} = ?`).join(', ');
+    const valores = Object.values(campos);
+    const query = `UPDATE Usuarios SET ${colunas} where id = ?`
+    valores.push(id)
+    const [resposta] = await conexao.execute(query, valores)
+    conexao.release()
+    return resposta
+}
+
+export async function atualizaSenha(id, senhaCriptografada) {
+    const conexao = await pool.getConnection();
+    const query = `UPDATE Usuarios SET senha = ? where id = ?`
+    const [resposta] = await conexao.execute(query, [senhaCriptografada, id])
+    conexao.release()
+    return resposta
+}
+
+
+export async function atuzalizaLastCheck(id) {
+    const conexao = await pool.getConnection();
+    const query = `UPDATE Usuarios SET last_check = DEFAULT where id = ?`
+    const [resposta] = await conexao.execute(query, [id])
+    conexao.release()
+    return resposta
+};

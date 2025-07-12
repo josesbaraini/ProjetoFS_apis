@@ -1,7 +1,8 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { retornaFotoPerfil, retornaParaLogin, retornaUsuarioId } from "../services/retorno/retornaUsuarios.js";
-import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validaDadosUsuario, validarCampos } from "../services/validacoes/valida.js";
+import { cadastraNotificacao } from "../services/cadastro/cadastraNotificacoes.js";
+import { retornaFotoPerfil, retornaParaLogin, retornaUsuarioId, retornaUsuarioLastCheck } from "../services/retorno/retornaUsuarios.js";
+import { respostaAtualizacao, validaDados, validaDadosAvancados, validaDadosBasicos, validaDadosUsuario, validarCampos, validaDadosPessoais, validaSenha } from "../services/validacoes/valida.js";
 import { cadastraUsuario } from "../services/cadastro/cadastraUsuario.js";
 import { autenticar, autenticarAcao } from "../services/validacoes/autenticar.js";
 import jwt from "jsonwebtoken";
@@ -14,12 +15,12 @@ import { excluiNotificacoesId } from "../services/exclusao/excluiNotificacoes.js
 import { excluiEventosId } from "../services/exclusao/excluiEventos.js";
 import { excluiPassoIdUsuario, excluiPassos } from "../services/exclusao/excluiPassos.js";
 import { validaParametroID } from "../services/validacoes/validaID.js";
-import { atualizaDadosAvancados, atualizaDadosBasicos, atualizaFotoPerfil, atualizaUsuario } from "../services/atualizacao/atualizaUsuario.js";
+import { atualizaDadosAvancados, atualizaDadosBasicos, atualizaFotoPerfil, atualizaUsuario, atualizaDadosPessoais, atualizaSenha, atuzalizaLastCheck } from "../services/atualizacao/atualizaUsuario.js";
 import upload from "../services/validacoes/perfilImagens.js";
 import path, { dirname } from "path"
 import { tratamendoErros } from "../services/validacoes/tratamentoErros.js";
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/C:\//, "/").replace("/rotas","");
+const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/C:\//, "/").replace("/rotas", "");
 const router = express.Router();
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body
@@ -32,10 +33,11 @@ router.post("/login", async (req, res) => {
     if (!senhaCorreta) {
         res.status(401).json({ error: "senha incorreta." })
     } else {
-        const token = jwt.sign({ 
+        const token = jwt.sign({
             id: usuario.id,
             email: usuario.email,
-            role: usuario.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            role: usuario.role
+        }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -47,14 +49,14 @@ router.post("/login", async (req, res) => {
 });
 router.post('/desconectar', (req, res) => {
     res.clearCookie('token', {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax"
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax"
     });
     res.status(200).json({ mensagem: 'Logout realizado com sucesso' });
-  });
+});
 router.get('/autenticar', autenticar, (req, res) => {
-    res.json({ mensagem: "Dados Autenticados" ,ok:true, usuario: req.user})
+    res.json({ mensagem: "Dados Autenticados", ok: true, usuario: req.user })
 })
 
 router.post('/cadastro', async (req, res) => {
@@ -63,19 +65,21 @@ router.post('/cadastro', async (req, res) => {
     const valida = validaDados(res, nome, email, telefone)
     if (!valida) {
 
-        
+
         try {
             const senha = await bcrypt.hash(senhaD, 10)
             const resultado = await cadastraUsuario(nome, email, senha, telefone)
             console.log(resultado)
 
             const usuario = await retornaParaLogin(email)
-            const token = jwt.sign({ 
+            const token = jwt.sign({
                 id: usuario.id,
                 email: usuario.email,
-                role: usuario.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                role: usuario.role
+            }, process.env.JWT_SECRET, { expiresIn: '1h' });
             await cadastraDadosBasicos(usuario.id);
             await cadastraDadosAvancados(usuario.id);
+            await cadastraNotificacao('Bem vindo!', `Olá ${nome}, seja bem vindo a mygym!, atualize seus dados na aba de Perfil`, "Sistema", usuario.id)
 
             res.cookie('token', token, {
                 httpOnly: true,
@@ -83,17 +87,17 @@ router.post('/cadastro', async (req, res) => {
                 sameSite: "lax"
             });
             res.status(201).json({ "usuario": usuario, 'token': token, "mensagem": "Usuário cadastrado com sucesso." })
-            
+
         } catch (error) {
             tratamendoErros(res, error)
         }
-            
+
     } else {
         return valida
     }
 })
 router.get("/informacoes/:id", validaParametroID(), autenticarAcao, async (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
     const usuario = await retornaUsuarioId(id);
     if (usuario.affectedRows > 0) {
         res.json(usuario[0]);
@@ -102,7 +106,38 @@ router.get("/informacoes/:id", validaParametroID(), autenticarAcao, async (req, 
     }
 })
 
-router.delete("/deletar/:id", validaParametroID(),autenticarAcao, async (req, res) => {
+router.get("/lastcheck/:id", validaParametroID(),autenticar, autenticarAcao, async (req, res) => {
+    const { id } = req.params;
+    const lastCheck = await retornaUsuarioLastCheck(id);
+
+    if (lastCheck && lastCheck.length > 0) {
+        res.json({
+            last_check: lastCheck[0].last_check,
+            data_formatada: lastCheck[0].last_check ? new Date(lastCheck[0].last_check).toLocaleDateString('pt-BR') : null
+        });
+    } else {
+        res.status(404).json({ mensagem: "Nenhum last_check encontrado para este usuário" });
+    }
+})
+
+router.patch("/lastcheck/:id", validaParametroID(),autenticar, autenticarAcao, async (req, res) => {
+    const { id } = req.params;
+    const resultado = await atuzalizaLastCheck(id);
+
+    if (resultado.affectedRows > 0) {
+        res.status(200).json({
+            mensagem: "Last check atualizado com sucesso",
+            ok: true
+        });
+    } else {
+        res.status(404).json({
+            mensagem: "Usuário não encontrado",
+            ok: false
+        });
+    }
+})
+
+router.delete("/deletar/:id", validaParametroID(), autenticarAcao, async (req, res) => {
     const id = req.params.id;
     let resposta = []
     let respostaI;
@@ -140,7 +175,7 @@ router.get('/dadosbasicos/:id', validaParametroID(), autenticarAcao, async (req,
     }
 })
 
-router.get('/dadosavancados/:id', validaParametroID(),autenticarAcao, async (req, res) => {
+router.get('/dadosavancados/:id', validaParametroID(), autenticarAcao, async (req, res) => {
     const id = req.params.id;
     const usuario = await retornaDadosAvancados(id);
     if (usuario.length > 0) {
@@ -151,7 +186,7 @@ router.get('/dadosavancados/:id', validaParametroID(),autenticarAcao, async (req
 
 })
 
-router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(),autenticarAcao, async (req, res)=>{
+router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(), autenticarAcao, async (req, res) => {
     const { id } = req.params
     const { campos } = req.body
     if (!validarCampos(campos)) {
@@ -162,13 +197,13 @@ router.patch('/dadosavancados/:id', validaParametroID(), validaDadosAvancados(),
     return respostaAtualizacao(res, resultado, {
         "IMC": campos.imc / 100,
         "Metabolismo Basal": campos.metabasal / 100,
-        "Biotipo":campos.biotipo
+        "Biotipo": campos.biotipo
     });
 
 
 })
 
-router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(),autenticarAcao, async (req, res) => {
+router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(), autenticarAcao, async (req, res) => {
     const { id } = req.params
     const { campos } = req.body
 
@@ -184,27 +219,69 @@ router.patch('/dadosbasicos/:id', validaParametroID(), validaDadosBasicos(),aute
 
 
 })
-router.get("/fotoPerfil/:id", validaParametroID(),autenticarAcao, async (req, res) => {
-    const {id} = req.params
+
+router.patch('/dadospessoais/:id', validaParametroID(), validaDadosPessoais(), validaSenha(), autenticarAcao, async (req, res) => {
+    const { id } = req.params
+    const { campos } = req.body
+
+    // Verifica se há campos para atualizar
+    if (!campos || Object.keys(campos).length === 0) {
+        return res.status(400).json({ "Erro:": "Nenhum campo foi enviado para atualização" });
+    }
+
+    // Os campos já foram validados pelos middlewares e estão em req.body.campos
+    const camposValidados = req.body.campos;
+
+    if (!validarCampos(camposValidados)) {
+        return res.status(400).json({ "Erro:": "Nenhum campo válido foi enviado para atualização" });
+    }
+
+    // Separa dados pessoais da senha
+    const { senha, ...dadosPessoais } = camposValidados;
+
+    let resultado;
+    let dadosAlterados = {};
+
+    // Atualiza dados pessoais se existirem
+    if (Object.keys(dadosPessoais).length > 0) {
+        resultado = await atualizaDadosPessoais(id, dadosPessoais);
+        dadosAlterados = { ...dadosPessoais };
+    }
+
+    // Atualiza senha se existir
+    if (senha) {
+        const resultadoSenha = await atualizaSenha(id, senha);
+        dadosAlterados.senha = "Senha Alterada";
+
+        // Se não atualizou dados pessoais, usa o resultado da senha
+        if (!resultado) {
+            resultado = resultadoSenha;
+        }
+    }
+
+    return respostaAtualizacao(res, resultado, dadosAlterados);
+})
+router.get("/fotoPerfil/:id", validaParametroID(), autenticarAcao, async (req, res) => {
+    const { id } = req.params
     const [imageUrl] = await retornaFotoPerfil(id)
     if (!imageUrl.fotoPerfil) {
-        return res.status(404).json({"mensagen":"Foto de perfil não encontrada"})
+        return res.status(404).json({ "mensagen": "Foto de perfil não encontrada" })
     }
     const imagemPerfil = path.resolve(`${__dirname}/uploads`, imageUrl.fotoPerfil);
     return res.status(200).sendFile(imagemPerfil);
 })
-router.post('/fotoPerfil/:id',validaParametroID(),autenticarAcao, upload.single('profileImage'), async (req, res) => {
+router.post('/fotoPerfil/:id', validaParametroID(), autenticarAcao, upload.single('profileImage'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'Nenhuma imagem enviada.' });
-    const {id} = req.params;
+    const { id } = req.params;
     const imageUrl = `${req.file.filename}`;
     const resultado = await atualizaFotoPerfil(id, imageUrl)
     return respostaAtualizacao(res, resultado, {
-        "url":imageUrl
+        "url": imageUrl
     })
-  });
-router.patch('/:id', validaParametroID(), validaDadosUsuario(),autenticarAcao, async (req, res) => {
-    const {id} = req.params;
-    const {campos} = req.body;
+});
+router.patch('/:id', validaParametroID(), validaDadosUsuario(), autenticarAcao, async (req, res) => {
+    const { id } = req.params;
+    const { campos } = req.body;
 
     if (!validarCampos(campos)) {
         return res.status(404).json({ "Erro:": "Nenhum campo valido foi enviado para atualização" });
@@ -212,15 +289,15 @@ router.patch('/:id', validaParametroID(), validaDadosUsuario(),autenticarAcao, a
     const resultado = await atualizaUsuario(id, campos);
 
     return respostaAtualizacao(res, resultado, {
-        "nome": campos.nome?campos.nome:"Dado Não Alterado",
-        "email": campos.email?campos.email:"Dado Não alterado",
-        "telefone": campos.telefone?campos.telefone:"Dado Não Alterado",
-        "data_nascimento": campos["data_nascimento"]?campos["data_nascimento"]:"Dado Não alterado",
-        "role":campos.role?campos.role:"Dado Não Alterado",
-        "senha":campos.senha?"Senha Alterada":"Dado Não Alterado"
+        "nome": campos.nome ? campos.nome : "Dado Não Alterado",
+        "email": campos.email ? campos.email : "Dado Não alterado",
+        "telefone": campos.telefone ? campos.telefone : "Dado Não Alterado",
+        "data_nascimento": campos["data_nascimento"] ? campos["data_nascimento"] : "Dado Não alterado",
+        "role": campos.role ? campos.role : "Dado Não Alterado",
+        "senha": campos.senha ? "Senha Alterada" : "Dado Não Alterado"
     });
-    
 
-    
+
+
 })
 export default router;
