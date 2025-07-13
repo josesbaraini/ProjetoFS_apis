@@ -29,15 +29,17 @@ router.get("/user/:userId", validaParametroID("userId"), async (req, res) => {
 });
 
 router.post("/cadastrar", validaBodyID('usuario_id'), async (req, res) => {
-    const { usuario_id, nome, descricao, anotacoes, passos } = req.body
+    const { usuario_id, nome, descricao, passos, data_treino, repetir } = req.body
     const dados = {
         "usuario_id": usuario_id,
         "nome": nome,
         "descricao": descricao,
-        "anotacoes": anotacoes,
-        "passos": passos
+        "passos": passos,
+        data_treino: data_treino,
+        repetir: repetir
     }
     const resposta = await cadastraTreinos(dados)
+    console.log(resposta)
     res.json(resposta)
 })
 
