@@ -46,12 +46,11 @@ router.post("/cadastrar", validaBodyID('usuario_id'), async (req, res) => {
 router.delete('/deletar/:idTreino', validaParametroID("idTreino"), async (req, res) => {
     const { idTreino } = req.params;
     const respostaP = await excluiPassos(idTreino);
-    if (respostaP.affectedRows > 0) {
+    
         const respostaT = await excluiTreinoId(idTreino);
         res.status(200).json({ "resposta": respostaT, mensagem: "Treino deletado com sucesso." });
-    } else {
-        res.status(404).json({ mensagem: "Nenhum dado desse usuario encontrado" });
-    }
+
+    
 })
 
 router.patch("/:idTreino", validaParametroID("idTreino"), async (req, res) => {
