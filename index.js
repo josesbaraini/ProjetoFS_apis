@@ -2,14 +2,15 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import userRotas from "./rotas/userRotas.js";
-import admRotas from "./rotas/admRotas.js";
-import treinosRotas from "./rotas/treinosRotas.js";
-import passosRotas from "./rotas/passosRotas.js";
-import notificacoesRotas from "./rotas/notificacoesRotas.js";
-import eventosRotas from './rotas/eventosRotas.js';
+import userRotas from "./routes/v1/userRotas.js";
+import admRotas from "./routes/v1/admRotas.js";
+import treinosRotas from "./routes/v1/treinosRotas.js";
+import passosRotas from "./routes/v1/passosRotas.js";
+import notificacoesRotas from "./routes/v1/notificacoesRotas.js";
+import eventosRotas from './routes/v1/eventosRotas.js';
 
-import  enviarWhatsapp  from "./services/zap/zap.js"; // 👈 Importa a função
+import UserRotasV2 from './routes/v2/userRoutesV2.js'
+import enviarWhatsapp from "./services/zap/zap.js";
 
 const app = express();
 
@@ -34,12 +35,14 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
-app.use("/api/user", userRotas);
-app.use("/api/adm", admRotas);
-app.use("/api/treinos", treinosRotas);
-app.use("/api/passos", passosRotas);
-app.use("/api/notificacoes", notificacoesRotas);
-app.use("/api/eventos", eventosRotas);
+app.use("/api/v1/user", userRotas);
+app.use("/api/v1/adm", admRotas);
+app.use("/api/v1treinos", treinosRotas);
+app.use("/api/v1/passos", passosRotas);
+app.use("/api/v1/notificacoes", notificacoesRotas);
+app.use("/api/v1/eventos", eventosRotas);
+
+app.use("/api/v2/user", UserRotasV2 )
 
 const porta = 8000;
 app.listen(porta, () => {
