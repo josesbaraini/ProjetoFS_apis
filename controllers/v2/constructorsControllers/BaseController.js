@@ -14,7 +14,12 @@ export default class BaseController {
         return (req, res, next) => this.handler(req, res, next);
     }
 
+    getParams(req, res){
+        this.params = req.params
+    }
+
     handler(req, res, next) {
+        this.getParams(req, res)
         const method = req.method.toLowerCase();
 
         if (typeof this[method] === "function") {
