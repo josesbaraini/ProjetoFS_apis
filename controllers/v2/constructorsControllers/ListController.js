@@ -1,16 +1,25 @@
 import BaseController from  './BaseController.js'
 
-export default class ListController extends BaseController {
+import { ListFromDb } from '../../../services/v2/ListService.js';
+
+export class ListController extends BaseController {
     constructor() {
-        super()
-        model = this.model
+        super();
+        this.tableName = this.constructor.tableName;
         
+
+        if (!this.tableName) {
+            throw new Error("Defina static tableName na subclasse!");
+        }
+        this.listService = new ListFromDb(this.tableName);
     }
 
-
-
-    get(req, res) {
-        res.send("Listando usuarios..." + model);
+    async get(req, res) {
+        try {
+            const data = await this.listService.listAll(this.tableName);
+            res.json(data);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     }
-
 }

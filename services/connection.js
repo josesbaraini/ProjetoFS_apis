@@ -23,4 +23,26 @@ const pool = mysql.createPool({
     enableKeepAlive: true
 });
 
+// Função para testar a conexão com o banco de dados
+async function testarConexao() {
+    try {
+        const connection = await pool.getConnection();
+        console.log('✅ Conexão com o banco de dados estabelecida com sucesso!');
+
+        // Testa uma query simples
+        const [rows] = await connection.execute('SELECT 1 as test');
+        console.log('✅ Query de teste executada com sucesso:', rows[0]);
+
+        connection.release();
+        return true;
+    } catch (error) {
+        connection.release();
+        console.error('❌ Erro ao conectar com o banco de dados:', error.message);
+        return false;
+    }
+}
+
+// Chama a função de teste uma vez quando o módulo é carregado
+testarConexao();
+
 export default pool; 

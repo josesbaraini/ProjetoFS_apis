@@ -1,13 +1,7 @@
 import  BaseController  from './constructorsControllers/BaseController.js';
-
-export class UserListCreateController extends BaseController {
-    get(req, res) {
-        res.send("Listando usuarios...");
-    }
-
-    post(req, res) {
-        res.send("Criando um usuario...");
-    }
+import { ListController } from './constructorsControllers/ListController.js';
+export class UserListCreateController extends ListController {
+    static tableName = 'Usuarios';
 }
 
 export class UserDatailUpdateDeleteController extends BaseController {
