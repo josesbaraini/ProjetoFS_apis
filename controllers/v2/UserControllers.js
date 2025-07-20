@@ -1,7 +1,8 @@
 import  BaseController  from './constructorsControllers/BaseController.js';
 import { ListController } from './constructorsControllers/ListController.js';
+import UserModel from "../../models/Usuarios.js";
 export class UserListCreateController extends ListController {
-    static tableName = 'Usuarios';
+    static model = UserModel;
 }
 
 export class UserDatailUpdateDeleteController extends BaseController {
