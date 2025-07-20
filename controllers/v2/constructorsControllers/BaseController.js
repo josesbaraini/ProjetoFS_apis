@@ -1,6 +1,7 @@
 export default class BaseController {
     constructor() {
         const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
+        
         for (const method of methods) {
             if (typeof this[method] === 'function' && method !== 'constructor') {
              
@@ -18,8 +19,13 @@ export default class BaseController {
         this.params = req.params
     }
 
+    getBody(req, res){
+        this.body = req.body;
+    }
+
     handler(req, res, next) {
         this.getParams(req, res)
+        this.getBody(req, res)
         const method = req.method.toLowerCase();
 
         if (typeof this[method] === "function") {

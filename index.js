@@ -10,6 +10,7 @@ import notificacoesRotas from "./routes/v1/notificacoesRotas.js";
 import eventosRotas from './routes/v1/eventosRotas.js';
 
 import UserRotasV2 from './routes/v2/userRoutesV2.js'
+import TreinosRotasV2 from "./routes/v2/workoutsRoutesV2.js";
 import enviarWhatsapp from "./services/zap/zap.js";
 
 const app = express();
@@ -37,12 +38,13 @@ app.use(express.json());
 
 app.use("/api/v1/user", userRotas);
 app.use("/api/v1/adm", admRotas);
-app.use("/api/v1treinos", treinosRotas);
+app.use("/api/v1/treinos", treinosRotas);
 app.use("/api/v1/passos", passosRotas);
 app.use("/api/v1/notificacoes", notificacoesRotas);
 app.use("/api/v1/eventos", eventosRotas);
 
 app.use("/api/v2/user", UserRotasV2 )
+app.use("/api/v2/treinos", TreinosRotasV2 )
 
 const porta = 8000;
 app.listen(porta, () => {
